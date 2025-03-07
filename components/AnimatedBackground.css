@@ -1,0 +1,7 @@
+.animated-background {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(90deg, #007BFF, #6A0DAD, #E6005A);
+    animation: animateBackground 10s infinite alternate;
+  }

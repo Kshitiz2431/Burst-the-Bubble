@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #b33771;
+  --primary-light: #de5c98;
+  --primary-dark: #92295c;
+}
+
+/* Bubble styles */
+/* Add to your globals.css */
+/* Add to your globals.css */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: radial-gradient(
+    circle at 33% 33%,
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0.05)
+  );
+  pointer-events: none;
+  will-change: transform;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2),
+    inset 0 0 10px rgba(255, 255, 255, 0.2);
+  transform-origin: center center;
+}
+
+.bubble::before {
+  content: "";
+  position: absolute;
+  width: 20%;
+  height: 20%;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  top: 15%;
+  left: 15%;
+  filter: blur(1px);
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  width: 10%;
+  height: 30%;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  top: 25%;
+  left: 25%;
+  transform: rotate(-45deg);
+  filter: blur(1px);
+}
+
+.bubble > div {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 255, 255, 0.2),
+    transparent 70%
+  );
+  filter: blur(2px);
+}
+
+.bubble-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--primary-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Add to your globals.css */
+/* Add to your globals.css */
+
+/* Add to your globals.css */
+
+/* Add to your globals.css */
+
+.animated-gradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    #de5c98 0%,
+    #b33771 50%,
+    #92295c 100%
+  );
+  background-size: 200% 200%;
+  animation: pulseGradient 10s ease infinite;
+}
+
+@keyframes pulseGradient {
+  0% {
+    background-size: 100% 100%;
+  }
+  50% {
+    background-size: 200% 200%;
+  }
+  100% {
+    background-size: 100% 100%;
+  }
+}
+
+/* Add a subtle overlay to enhance depth */
+.gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    transparent 0%,
+    rgba(146, 41, 92, 0.3) 100%
+  );
+  mix-blend-mode: overlay;
+}
+@keyframes glow {
+  0%,
+  100% {
+    text-shadow: 0 0 30px rgba(255, 107, 107, 0.3),
+      0 0 60px rgba(255, 107, 107, 0.2), 0 0 100px rgba(255, 107, 107, 0.1);
+  }
+  50% {
+    text-shadow: 0 0 40px rgba(255, 107, 107, 0.4),
+      0 0 80px rgba(255, 107, 107, 0.3), 0 0 120px rgba(255, 107, 107, 0.2);
+  }
+}
+/* Quill editor styles */
+.ql-container {
+  font-size: 16px !important;
+}
+
+.ql-editor {
+  min-height: 300px;
+  font-family: inherit !important;
+}
+
+/* React-select customization */
+.react-select-container .react-select__control {
+  @apply border-gray-200 hover:border-[#B33771];
+}
+
+.react-select-container .react-select__control--is-focused {
+  @apply border-[#B33771] shadow-none ring-2 ring-[#B33771] ring-opacity-20;
+}
+
+.react-select-container .react-select__option--is-focused {
+  @apply bg-[#B33771]/10;
+}
+
+.react-select-container .react-select__option--is-selected {
+  @apply bg-[#B33771];
+}
+/* Quill editor styles */
+.ql-toolbar.ql-snow {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+  height: 400px;  /* Or whatever height you prefer */
+}
+
+.ql-editor {
+  min-height: 400px;  /* Should match container height */
+  font-size: 16px !important;
+  font-family: inherit !important;
+}
+
+.ql-editor img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em 0;
+}
+
+.ql-editor p {
+  margin-bottom: 1em;
+}
