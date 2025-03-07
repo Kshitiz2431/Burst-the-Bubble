@@ -38,7 +38,7 @@ A modern web application providing relationship advice and resources, built with
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/BURST_THE_BUBBLE.git
+git clone https://github.com/Kshitiz2431/Burst-the-Bubble.git
 cd BURST_THE_BUBBLE
 ```
 
