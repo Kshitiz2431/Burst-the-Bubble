@@ -85,9 +85,8 @@ yarn dev
 ├── app/              # Next.js 13+ app directory
 ├── components/       # Reusable React components
 ├── lib/             # Utility functions and helpers
-├── providers/       # React context providers
-├── public/          # Static assets
-└── styles/          # Global styles and Tailwind config
+├── prisma/         # Database schemas
+├── types/          # defined types
 ```
 
 ## 🔧 Configuration
