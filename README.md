@@ -82,7 +82,6 @@ yarn dev
 ## 📁 Project Structure
 
 ```
-frontend/
 ├── app/              # Next.js 13+ app directory
 ├── components/       # Reusable React components
 ├── lib/             # Utility functions and helpers
