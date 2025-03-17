@@ -5,6 +5,7 @@ import { prisma as db } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../../../api/auth/[...nextauth]/route";
 import { Image } from "@/components/Image";
+import BlogContent from "@/components/resources/BlogContent";
 
 
 async function getBlog(slug: string) {
@@ -85,10 +86,12 @@ export default async function AdminBlogPreviewPage({
           </div>
         </header>
 
-        <div 
+        {/* <div 
           className="prose prose-lg max-w-none"
           dangerouslySetInnerHTML={{ __html: blog.content }} 
-        />
+        /> */}
+
+        <BlogContent content={blog.content}/>
       </article>
     </div>
   );

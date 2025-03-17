@@ -9,6 +9,56 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+enum BuddyRequestType {
+  FRIENDLY
+  DETAILED
+}
+
+enum BuddyRequestStatus {
+  PENDING
+  ASSIGNED
+  COMPLETED
+  CANCELLED
+}
+
+enum BuddyMode {
+  CHAT
+  CALL
+  VIDEO
+}
+
+model BuddyRequest {
+  id              String             @id @default(cuid())
+  type            BuddyRequestType
+  name            String
+  email           String
+  phone           String?
+  preferredDate   DateTime
+  timeSlot        String
+  mode            BuddyMode
+  message         String             // For FRIENDLY requests, this is the initial message; for DETAILED, it holds the situation description.
+  extraInfo       String?            // Additional context for DETAILED requests, e.g., attempted solutions.
+  acknowledged    Boolean            @default(true)
+  status          BuddyRequestStatus @default(PENDING)
+  assignedBuddy   Buddy?             @relation(fields: [assignedBuddyId], references: [id])
+  assignedBuddyId String?
+  calendlyLink    String?            // Calendly scheduling link for the assigned buddy.
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+
+model Buddy {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  phone         String?
+  calendlyLink  String         // The Calendly scheduling URL for the buddy
+  isActive      Boolean        @default(true)
+  buddyRequests BuddyRequest[] // Requests assigned to this buddy
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
 model Admin {
     id            String    @id @default(cuid())
     email         String    @unique

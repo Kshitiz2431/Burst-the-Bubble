@@ -90,6 +90,7 @@ export default function ResourcesPage() {
     try {
       const response = await fetch(`/api/image/${encodeURIComponent(key)}`);
       const data = await response.json();
+      console.log(data);
       if (data.url) {
         setImageUrls((prev) => ({ ...prev, [key]: data.url }));
       }
@@ -332,7 +333,7 @@ export default function ResourcesPage() {
                 {/* Only show image section if we have a valid key */}
                 {coverOrImageKey && (
                   <ImageWithLoader
-                    src={imageUrls[coverOrImageKey] || "/placeholder.jpg"}
+                    src={imageUrls[coverOrImageKey]}
                     alt={resource.title}
                     resourceType={resource.type}
                   />

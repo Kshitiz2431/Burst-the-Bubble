@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { S3Image } from "@/components/ui/s3-image";
 import { formatDistanceToNow } from "date-fns";
 import { ViewCounter } from '../components/ViewCounter';
+import BlogContent from "@/components/resources/BlogContent";
 
 
 async function getBlog(slug: string) {
@@ -83,10 +84,12 @@ export default async function BlogPage({
         )}
 
         {/* Content */}
-        <div 
+        {/* <div 
           className="prose prose-lg max-w-none"
           dangerouslySetInnerHTML={{ __html: blog.content }} 
-        />
+        /> */}
+
+        <BlogContent content={blog.content}/>
 
         {/* Footer */}
         <footer className="mt-12 py-8 border-t border-gray-200">
