@@ -1,6 +1,6 @@
 # BURST THE BUBBLE
 
-![Landing Page](./public/landing-page.png)
+![Landing Page](./public/LandingPage.png)
 
 A web platform designed to connect individuals seeking support and guidance through personalized buddy interactions, helping users "burst their bubble" and expand their perspectives through meaningful conversations.
 
@@ -92,23 +92,12 @@ yarn dev
 
 The application will be available at [http://localhost:3000](http://localhost:3000).
 
-## 🖼️ Adding Screenshots
-
-To add your own screenshots to the README:
-
-1. Take screenshots of your application
-2. Save them in the `public` directory
-3. Update the image path in this README
-   - Example: `![Landing Page](./public/landing-page.png)`
 
 ## 📝 Admin Portal Access
 
 To access the admin portal:
 
-1. Navigate to `/admin/login`
-2. Use the following credentials for development:
-   - Email: `admin@example.com`
-   - Password: `password123`
+ Navigate to `/admin/login`
 
 ## 🔄 Calendly Integration
 
@@ -117,13 +106,6 @@ To configure Calendly integration:
 1. Create a Calendly account if you don't have one
 2. Update the Calendly URL in `app/talk-to-buddy/FriendlyForm.tsx` with your Calendly URL
 3. Set up the Calendly API key in your `.env` file
-
-## 🧪 Running Tests
-
-```bash
-npm test
-# or
-yarn test
 ```
 
 ## 🛠️ Building for Production
@@ -161,17 +143,6 @@ yarn start
 └── ...
 ```
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🙏 Acknowledgements
 
@@ -184,6 +155,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by Kshitiz Agarwal
 
 
