@@ -1,36 +1,189 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BURST THE BUBBLE
 
-## Getting Started
+![Landing Page](./public/landing-page.png)
 
-First, run the development server:
+A web platform designed to connect individuals seeking support and guidance through personalized buddy interactions, helping users "burst their bubble" and expand their perspectives through meaningful conversations.
+
+## 🌟 Features
+
+- **User Authentication**: Secure login and registration system
+- **Talk to Buddy**: Schedule conversations with buddy mentors
+- **Interactive Admin Portal**: Comprehensive management system for:
+  - Buddy management
+  - Request tracking
+  - Content management (blogs, library resources, templates)
+  - Newsletter management
+  - Analytics and reporting
+- **Calendly Integration**: Seamless scheduling with buddy mentors
+- **Responsive Design**: Fully responsive UI for all device sizes
+
+## 🚀 Tech Stack
+
+- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
+- **UI Components**: shadcn/ui
+- **Backend**: Next.js API routes
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js
+- **Styling**: Tailwind CSS with custom theming
+
+## 📋 Prerequisites
+
+Before running this project, make sure you have the following installed:
+
+- Node.js (v18 or higher)
+- npm or yarn
+- PostgreSQL database
+- Git
+
+## 🔧 Installation & Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/yourusername/BURST_THE_BUBBLE.git
+cd BURST_THE_BUBBLE/frontend
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+# or
+yarn install
+```
+
+### 3. Set up environment variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/burstthebubble"
+
+# NextAuth
+NEXTAUTH_SECRET="your-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Auth providers (if applicable)
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# Other services
+CALENDLY_API_KEY="your-calendly-api-key"
+```
+
+### 4. Set up the database
+
+```bash
+# Run database migrations
+npx prisma migrate dev
+
+# Generate Prisma client
+npx prisma generate
+```
+
+### 5. Run the development server
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🖼️ Adding Screenshots
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To add your own screenshots to the README:
 
-## Learn More
+1. Take screenshots of your application
+2. Save them in the `public` directory
+3. Update the image path in this README
+   - Example: `![Landing Page](./public/landing-page.png)`
 
-To learn more about Next.js, take a look at the following resources:
+## 📝 Admin Portal Access
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+To access the admin portal:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Navigate to `/admin/login`
+2. Use the following credentials for development:
+   - Email: `admin@example.com`
+   - Password: `password123`
 
-## Deploy on Vercel
+## 🔄 Calendly Integration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To configure Calendly integration:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Create a Calendly account if you don't have one
+2. Update the Calendly URL in `app/talk-to-buddy/FriendlyForm.tsx` with your Calendly URL
+3. Set up the Calendly API key in your `.env` file
+
+## 🧪 Running Tests
+
+```bash
+npm test
+# or
+yarn test
+```
+
+## 🛠️ Building for Production
+
+```bash
+npm run build
+# or
+yarn build
+```
+
+To start the production server:
+
+```bash
+npm run start
+# or
+yarn start
+```
+
+## 📁 Project Structure
+
+```
+/
+├── app/                # Next.js app directory
+│   ├── admin/          # Admin portal routes
+│   ├── api/            # API routes
+│   ├── talk-to-buddy/  # Talk to Buddy feature
+│   └── ...
+├── components/         # Reusable components
+│   ├── admin/          # Admin components
+│   ├── ui/             # UI components (shadcn)
+│   └── ...
+├── lib/                # Utility functions and services
+├── prisma/             # Prisma schema and migrations
+├── public/             # Static assets
+└── ...
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgements
+
+- [Next.js](https://nextjs.org/)
+- [Prisma](https://www.prisma.io/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/)
+- [NextAuth.js](https://next-auth.js.org/)
+- [Calendly](https://calendly.com/)
+
+---
+
+Made with ❤️ by [Your Name]
+
+
