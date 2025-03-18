@@ -153,8 +153,5 @@ yarn start
 - [NextAuth.js](https://next-auth.js.org/)
 - [Calendly](https://calendly.com/)
 
----
-
-Made with ❤️ by Kshitiz Agarwal
 
 
