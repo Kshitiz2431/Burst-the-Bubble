@@ -39,40 +39,45 @@ export function AdminNav() {
     <div className="sticky top-0 w-full bg-white border-b shadow-sm z-50">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center">
             {session && <MobileNav />}
             <Link
               href="/admin/dashboard"
-              className="flex items-center space-x-2 font-bold text-xl text-[#B33771]"
+              className="flex items-center mr-6 lg:mr-8 font-bold text-xl text-[#B33771] whitespace-nowrap"
             >
-              <span className="hidden sm:inline">Admin Portal</span>
-              <span className="sm:hidden">Admin Portal</span>
+              Admin Portal
             </Link>
+            
             {session && (
-              <div className="hidden md:flex items-center space-x-4">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        "flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                        pathname === item.href
-                          ? "bg-[#B33771] text-white"
-                          : "text-gray-600 hover:bg-pink-50"
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  );
-                })}
-              </div>
+              <nav className="hidden md:flex flex-1">
+                <ul className="flex items-center gap-1 lg:gap-2">
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = pathname === item.href;
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "flex items-center justify-center whitespace-nowrap px-2 py-2 lg:px-3 rounded-md text-sm font-medium transition-colors",
+                            isActive
+                              ? "bg-[#B33771] text-white"
+                              : "text-gray-600 hover:bg-pink-50"
+                          )}
+                        >
+                          <Icon className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
             )}
           </div>
+          
           {session && (
-            <div className="flex items-center space-x-4 w-56 bg-white z-[100]">
+            <div className="flex items-center ml-6 pl-4 border-l border-gray-200">
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center space-x-2 focus:outline-none">
                   <Avatar className="h-8 w-8 bg-pink-100">
@@ -80,26 +85,26 @@ export function AdminNav() {
                       {initials}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden sm:inline text-sm text-gray-600">
+                  <span className="hidden sm:inline text-sm text-gray-600 max-w-[150px] truncate">
                     {session.user?.email}
                   </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent 
-  align="end" 
-  className="w-56 bg-white border rounded-md shadow-lg p-2 z-[100]"
->
-  <DropdownMenuLabel className="px-2 py-1.5 text-sm font-semibold text-gray-900">
-    My Account
-  </DropdownMenuLabel>
-  <DropdownMenuSeparator className="my-1 bg-gray-200" />
-  <DropdownMenuItem
-    className="px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md cursor-pointer flex items-center"
-    onClick={() => signOut({ callbackUrl: "/admin/login" })}
-  >
-    <LogOut className="mr-2 h-4 w-4" />
-    Sign Out
-  </DropdownMenuItem>
-</DropdownMenuContent>
+                  align="end" 
+                  className="w-56 bg-white border rounded-md shadow-lg p-2 z-[100]"
+                >
+                  <DropdownMenuLabel className="px-2 py-1.5 text-sm font-semibold text-gray-900">
+                    My Account
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="my-1 bg-gray-200" />
+                  <DropdownMenuItem
+                    className="px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md cursor-pointer flex items-center"
+                    onClick={() => signOut({ callbackUrl: "/admin/login" })}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
               </DropdownMenu>
             </div>
           )}

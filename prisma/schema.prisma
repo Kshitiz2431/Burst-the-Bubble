@@ -34,7 +34,9 @@ model BuddyRequest {
   email           String
   phone           String?
   preferredDate   DateTime
-  timeSlot        String
+  timeSlot        String             // Changed from enum to String to store specific Calendly time
+  calendlyEventUri String?           // URI for the scheduled Calendly event
+  calendlyEventId String?            // Calendly event ID for reference
   mode            BuddyMode
   message         String             // For FRIENDLY requests, this is the initial message; for DETAILED, it holds the situation description.
   extraInfo       String?            // Additional context for DETAILED requests, e.g., attempted solutions.

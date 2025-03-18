@@ -3,7 +3,8 @@ import {
   BookOpen,
   FileText,
   FolderTree,
-  ScrollText
+  ScrollText,
+  MessageCircle
 } from "lucide-react";
 
 export const navItems = [
@@ -13,12 +14,12 @@ export const navItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Blog Posts",
+    title: "Blogs",
     href: "/admin/blogs",
     icon: FileText,
   },
   {
-    title: "Love Library",
+    title: "Library",
     href: "/admin/library",
     icon: BookOpen,
   },
@@ -33,9 +34,14 @@ export const navItems = [
     icon: FolderTree,
   },
   {
-    title:"Newsletter",
-    href:"/admin/newsletter",
-    icon:ScrollText
+    title: "Newsletter",
+    href: "/admin/newsletter",
+    icon: ScrollText
+  },
+  {
+    title: "Talk to Buddy",
+    href: "/admin/talk-to-buddy",
+    icon: MessageCircle,
   },
   // {
   //   title: "Settings",
