@@ -127,7 +127,8 @@ export async function POST(request: NextRequest) {
       { 
         message: "Buddy request created successfully", 
         requestId: buddyRequest.id,
-        buddyName: availableBuddy.name
+        buddyName: availableBuddy.name,
+        buddyCalendlyLink: availableBuddy.calendlyLink
       },
       { status: 201 }
     );

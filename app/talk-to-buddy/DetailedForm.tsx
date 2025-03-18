@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -68,6 +68,10 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function DetailedForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [buddyName, setBuddyName] = useState("");
+  const [buddyCalendlyUrl, setBuddyCalendlyUrl] = useState("");
+  const calendlyContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -83,13 +87,59 @@ export default function DetailedForm() {
     },
   });
 
+  // Load Calendly widget script
+  useEffect(() => {
+    if (formSubmitted && buddyCalendlyUrl) {
+      // Clean up any existing scripts to avoid duplicates
+      const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+      
+      // Create and append new script
+      const script = document.createElement('script');
+      script.src = 'https://assets.calendly.com/assets/external/widget.js';
+      script.async = true;
+      script.onload = () => {
+        console.log("Calendly script loaded successfully");
+        if (calendlyContainerRef.current && window.Calendly) {
+          console.log("Initializing Calendly widget with URL:", buddyCalendlyUrl);
+          window.Calendly.initInlineWidget({
+            url: buddyCalendlyUrl,
+            parentElement: calendlyContainerRef.current,
+            prefill: {
+              name: form.getValues('name'),
+              email: form.getValues('email'),
+            },
+            utm: {
+              utmSource: 'burstthebubble',
+              utmMedium: 'detailed_form',
+            }
+          });
+        }
+      };
+      
+      document.body.appendChild(script);
+
+      return () => {
+        // Clean up script on unmount
+        const scriptToRemove = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]');
+        if (scriptToRemove) {
+          scriptToRemove.remove();
+        }
+      };
+    }
+  }, [formSubmitted, buddyCalendlyUrl, form]);
+
   // Form submission handler
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     
     try {
-      // Log data for debugging
-      console.log("Submitting detailed form data:", data);
+      console.log("Submitting form data:", {
+        ...data,
+        type: "DETAILED"
+      });
       
       // Make API call to create buddy request
       const response = await fetch("/api/buddy-request", {
@@ -104,6 +154,7 @@ export default function DetailedForm() {
       });
       
       const result = await response.json();
+      console.log("API response:", result);
       
       if (!response.ok) {
         if (result.message === "All buddies are busy at this time") {
@@ -113,7 +164,18 @@ export default function DetailedForm() {
         }
       } else {
         toast.success(`Your request has been submitted! ${result.buddyName} will be your buddy for this session.`);
-        form.reset();
+        
+        // Default Calendly URL if none is provided in the response
+        const calendlyUrl = result.buddyCalendlyLink || 'https://calendly.com/burst-the-bubble/buddy-session';
+        
+        console.log("Setting buddy info:", {
+          name: result.buddyName,
+          calendlyUrl: calendlyUrl
+        });
+        
+        setBuddyName(result.buddyName);
+        setBuddyCalendlyUrl(calendlyUrl);
+        setFormSubmitted(true);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -123,46 +185,94 @@ export default function DetailedForm() {
     }
   };
 
+  // Show the Calendly scheduling widget if the form has been submitted
+  if (formSubmitted) {
+    console.log("Form submitted, buddy URL:", buddyCalendlyUrl);
+    
+    return (
+      <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-[#B33771] mb-2">Schedule with {buddyName}</h2>
+          <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
+            Please select a convenient time slot from {buddyName}'s calendar. You'll receive a confirmation email once your appointment is scheduled.
+          </p>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden mb-8">
+          <div 
+            ref={calendlyContainerRef} 
+            id="calendly-inline-widget"
+            className="w-full"
+            style={{ height: "calc(100vh - 300px)", minHeight: "800px", maxHeight: "1000px" }}
+          ></div>
+        </div>
+        
+        <div className="text-center">
+          <Button 
+            onClick={() => {
+              setFormSubmitted(false);
+              form.reset();
+            }}
+            className="px-6 py-2 bg-white hover:bg-gray-50 text-[#B33771] border border-[#B33771] hover:border-[#9C296A] transition-colors duration-200"
+            variant="outline"
+          >
+            Go Back to Form
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-card p-6 rounded-lg shadow-sm border">
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl font-semibold mb-2">Detailed Form</h2>
-        <p className="text-muted-foreground">
-          Please provide more context to help us better understand your needs.
+    <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+      <div className="mb-8 text-center">
+        <h2 className="text-2xl font-bold text-[#B33771] mb-2">Detailed Request Form</h2>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Please provide more details to help our Buddies better understand your needs. This helps us match you with the most suitable buddy.
         </p>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Full Name Field */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your full name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Full Name Field */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700 font-medium">Full Name</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="Enter your full name"
+                      {...field}
+                      className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
 
-          {/* Email Field */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="email@example.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Email Field */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700 font-medium">Email Address</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="email@example.com"
+                      {...field}
+                      className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Phone Number Field (Optional) */}
           <FormField
@@ -170,83 +280,90 @@ export default function DetailedForm() {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number (Optional)</FormLabel>
+                <FormLabel className="text-gray-700 font-medium">Phone Number (Optional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your phone number" {...field} />
+                  <Input 
+                    placeholder="Your phone number"
+                    {...field}
+                    className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
+                  />
                 </FormControl>
-                <FormDescription>
-                  Only provided if you'd prefer a phone call
+                <FormDescription className="text-gray-500 text-sm">
+                  Only provide if you prefer a phone call
                 </FormDescription>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
 
-          {/* Date Selection */}
-          <FormField
-            control={form.control}
-            name="preferredDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Preferred Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Date Selection */}
+            <FormField
+              control={form.control}
+              name="preferredDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel className="text-gray-700 font-medium">Preferred Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={`w-full pl-3 text-left font-normal border-gray-300 hover:bg-gray-50 ${
+                            !field.value && "text-gray-500"
+                          }`}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Select a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                        className="border-[#B33771]"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+
+            {/* Time Slot Selection */}
+            <FormField
+              control={form.control}
+              name="timeSlot"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700 font-medium">Preferred Time Slot</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={`w-full pl-3 text-left font-normal ${
-                          !field.value && "text-muted-foreground"
-                        }`}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Select a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
+                      <SelectTrigger className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]">
+                        <SelectValue placeholder="Select a time slot" />
+                      </SelectTrigger>
                     </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Time Slot Selection */}
-          <FormField
-            control={form.control}
-            name="timeSlot"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Preferred Time Slot</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a time slot" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {TIME_SLOTS.map((slot) => (
-                      <SelectItem key={slot} value={slot}>
-                        {slot}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                    <SelectContent className="bg-white">
+                      {TIME_SLOTS.map((slot) => (
+                        <SelectItem key={slot} value={slot}>
+                          {slot}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Communication Mode Field */}
           <FormField
@@ -254,42 +371,42 @@ export default function DetailedForm() {
             name="mode"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel>Preferred Mode of Communication</FormLabel>
+                <FormLabel className="text-gray-700 font-medium">Preferred Mode of Communication</FormLabel>
                 <FormControl>
-                  <div className="flex space-x-4 items-center">
-                    <label className="flex items-center space-x-2">
+                  <div className="flex flex-wrap space-x-6 items-center">
+                    <label className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="radio"
                         value="CHAT"
                         checked={field.value === "CHAT"}
                         onChange={() => field.onChange("CHAT")}
-                        className="h-4 w-4"
+                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
                       />
-                      <span>💬 Chat</span>
+                      <span className="text-gray-800">💬 Chat</span>
                     </label>
-                    <label className="flex items-center space-x-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="radio"
                         value="CALL"
                         checked={field.value === "CALL"}
                         onChange={() => field.onChange("CALL")}
-                        className="h-4 w-4"
+                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
                       />
-                      <span>📞 Call</span>
+                      <span className="text-gray-800">📞 Call</span>
                     </label>
-                    <label className="flex items-center space-x-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="radio"
                         value="VIDEO"
                         checked={field.value === "VIDEO"}
                         onChange={() => field.onChange("VIDEO")}
-                        className="h-4 w-4"
+                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
                       />
-                      <span>🎥 Video Call</span>
+                      <span className="text-gray-800">🎥 Video Call</span>
                     </label>
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -300,15 +417,15 @@ export default function DetailedForm() {
             name="message"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>What brings you here today? (Brief description of your situation)</FormLabel>
+                <FormLabel className="text-gray-700 font-medium">What brings you here today? (Brief description of your situation)</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Please describe your situation..."
-                    className="min-h-[100px]"
+                    className="min-h-[120px] border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -319,15 +436,15 @@ export default function DetailedForm() {
             name="extraInfo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Have you tried any solutions so far?</FormLabel>
+                <FormLabel className="text-gray-700 font-medium">Have you tried any solutions so far?</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Tell us what you've already tried..."
-                    className="min-h-[100px]"
+                    className="min-h-[120px] border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -337,18 +454,19 @@ export default function DetailedForm() {
             control={form.control}
             name="acknowledged"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#B33771] data-[state=checked]:border-[#B33771]"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>
+                  <FormLabel className="text-gray-700">
                     I acknowledge that this is a listening service, not professional counseling or therapy.
                   </FormLabel>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </div>
               </FormItem>
             )}
@@ -356,7 +474,7 @@ export default function DetailedForm() {
 
           <Button 
             type="submit" 
-            className="w-full"
+            className="w-full bg-[#B33771] hover:bg-[#9C296A] text-white py-2.5 text-md font-medium"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "Submit Request"}

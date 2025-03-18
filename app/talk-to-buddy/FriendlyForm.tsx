@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -34,6 +34,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Define time slots
 const TIME_SLOTS = [
@@ -66,6 +67,10 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function FriendlyForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [buddyName, setBuddyName] = useState("");
+  const [buddyCalendlyUrl, setBuddyCalendlyUrl] = useState("");
+  const calendlyContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -78,6 +83,50 @@ export default function FriendlyForm() {
       timeSlot: "",
     },
   });
+
+  // Load Calendly widget script
+  useEffect(() => {
+    if (formSubmitted && buddyCalendlyUrl) {
+      // Clean up any existing scripts to avoid duplicates
+      const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+      
+      // Create and append new script
+      const script = document.createElement('script');
+      script.src = 'https://assets.calendly.com/assets/external/widget.js';
+      script.async = true;
+      script.onload = () => {
+        console.log("Calendly script loaded successfully");
+        if (calendlyContainerRef.current && window.Calendly) {
+          console.log("Initializing Calendly widget with URL:", buddyCalendlyUrl);
+          window.Calendly.initInlineWidget({
+            url: buddyCalendlyUrl,
+            parentElement: calendlyContainerRef.current,
+            prefill: {
+              name: form.getValues('name'),
+              email: form.getValues('email'),
+            },
+            utm: {
+              utmSource: 'burstthebubble',
+              utmMedium: 'friendly_form',
+            }
+          });
+        }
+      };
+      
+      document.body.appendChild(script);
+
+      return () => {
+        // Clean up script on unmount
+        const scriptToRemove = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]');
+        if (scriptToRemove) {
+          scriptToRemove.remove();
+        }
+      };
+    }
+  }, [formSubmitted, buddyCalendlyUrl, form]);
 
   // Form submission handler
   const onSubmit = async (data: FormValues) => {
@@ -103,6 +152,7 @@ export default function FriendlyForm() {
       });
       
       const result = await response.json();
+      console.log("API response:", result);
       
       if (!response.ok) {
         if (result.message === "All buddies are busy at this time") {
@@ -112,7 +162,18 @@ export default function FriendlyForm() {
         }
       } else {
         toast.success(`Your request has been submitted! ${result.buddyName} will be your buddy for this session.`);
-        form.reset();
+        
+        // Default Calendly URL if none is provided in the response
+        const calendlyUrl = result.buddyCalendlyLink || 'https://calendly.com/burst-the-bubble/buddy-session';
+        
+        console.log("Setting buddy info:", {
+          name: result.buddyName,
+          calendlyUrl: calendlyUrl
+        });
+        
+        setBuddyName(result.buddyName);
+        setBuddyCalendlyUrl(calendlyUrl);
+        setFormSubmitted(true);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -122,112 +183,163 @@ export default function FriendlyForm() {
     }
   };
 
+  // Show the Calendly scheduling widget if the form has been submitted
+  if (formSubmitted) {
+    console.log("Form submitted, buddy URL:", buddyCalendlyUrl);
+    
+    return (
+      <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-[#B33771] mb-2">Schedule with {buddyName}</h2>
+          <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
+            Please select a convenient time slot from {buddyName}'s calendar. You'll receive a confirmation email once your appointment is scheduled.
+          </p>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden mb-8">
+          <div 
+            ref={calendlyContainerRef} 
+            id="calendly-inline-widget"
+            className="w-full"
+            style={{ height: "calc(100vh - 300px)", minHeight: "800px", maxHeight: "1000px" }}
+          ></div>
+        </div>
+        
+        <div className="text-center">
+          <Button 
+            onClick={() => {
+              setFormSubmitted(false);
+              form.reset();
+            }}
+            className="px-6 py-2 bg-white hover:bg-gray-50 text-[#B33771] border border-[#B33771] hover:border-[#9C296A] transition-colors duration-200"
+            variant="outline"
+          >
+            Go Back to Form
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-card p-6 rounded-lg shadow-sm border">
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl font-semibold mb-2">Friendly & Conversational Form</h2>
-        <p className="text-muted-foreground">
-          👋 Hey there! Let's get you connected with a Buddy who's ready to listen!
+    <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+      <div className="mb-8 text-center">
+        <h2 className="text-2xl font-bold text-[#B33771] mb-2">Friendly & Conversational Form</h2>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          👋 Hey there! Let's get you connected with a Buddy who's ready to listen and help you burst your bubble!
         </p>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Name Field */}
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Your Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter your name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Email Field */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Best Email to Reach You</FormLabel>
-                <FormControl>
-                  <Input placeholder="email@example.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Date Selection */}
-          <FormField
-            control={form.control}
-            name="preferredDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>When would you like to chat?</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={`w-full pl-3 text-left font-normal ${
-                          !field.value && "text-muted-foreground"
-                        }`}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Select a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Time Slot Selection */}
-          <FormField
-            control={form.control}
-            name="timeSlot"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Preferred Time Slot</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Name Field */}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700 font-medium">Your Name</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a time slot" />
-                    </SelectTrigger>
+                    <Input 
+                      placeholder="Enter your name" 
+                      {...field} 
+                      className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]" 
+                    />
                   </FormControl>
-                  <SelectContent>
-                    {TIME_SLOTS.map((slot) => (
-                      <SelectItem key={slot} value={slot}>
-                        {slot}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+
+            {/* Email Field */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700 font-medium">Best Email to Reach You</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="email@example.com" 
+                      {...field} 
+                      className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]" 
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Date Selection */}
+            <FormField
+              control={form.control}
+              name="preferredDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel className="text-gray-700 font-medium">When would you like to chat?</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={`w-full pl-3 text-left font-normal border-gray-300 hover:bg-gray-50 ${
+                            !field.value && "text-gray-500"
+                          }`}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Select a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                        className="border-[#B33771]"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+
+            {/* Time Slot Selection */}
+            <FormField
+              control={form.control}
+              name="timeSlot"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700 font-medium">Preferred Time Slot</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]">
+                        <SelectValue placeholder="Select a time slot" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-white">
+                      {TIME_SLOTS.map((slot) => (
+                        <SelectItem key={slot} value={slot}>
+                          {slot}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+          </div>
 
           {/* Communication Mode Field */}
           <FormField
@@ -235,42 +347,42 @@ export default function FriendlyForm() {
             name="mode"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel>How do you prefer to connect?</FormLabel>
+                <FormLabel className="text-gray-700 font-medium">How do you prefer to connect?</FormLabel>
                 <FormControl>
-                  <div className="flex space-x-4 items-center">
-                    <label className="flex items-center space-x-2">
+                  <div className="flex flex-wrap space-x-6 items-center">
+                    <label className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="radio"
                         value="CHAT"
                         checked={field.value === "CHAT"}
                         onChange={() => field.onChange("CHAT")}
-                        className="h-4 w-4"
+                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
                       />
-                      <span>💬 Chat</span>
+                      <span className="text-gray-800">💬 Chat</span>
                     </label>
-                    <label className="flex items-center space-x-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="radio"
                         value="CALL"
                         checked={field.value === "CALL"}
                         onChange={() => field.onChange("CALL")}
-                        className="h-4 w-4"
+                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
                       />
-                      <span>📞 Call</span>
+                      <span className="text-gray-800">📞 Call</span>
                     </label>
-                    <label className="flex items-center space-x-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="radio"
                         value="VIDEO"
                         checked={field.value === "VIDEO"}
                         onChange={() => field.onChange("VIDEO")}
-                        className="h-4 w-4"
+                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
                       />
-                      <span>🎥 Video</span>
+                      <span className="text-gray-800">🎥 Video</span>
                     </label>
                   </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -281,15 +393,15 @@ export default function FriendlyForm() {
             name="message"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Tell us a little about what's on your mind:</FormLabel>
+                <FormLabel className="text-gray-700 font-medium">Tell us a little about what's on your mind:</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="I'd like to talk about..."
-                    className="min-h-[100px]"
+                    className="min-h-[120px] border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -299,18 +411,19 @@ export default function FriendlyForm() {
             control={form.control}
             name="acknowledged"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="data-[state=checked]:bg-[#B33771] data-[state=checked]:border-[#B33771]"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>
+                  <FormLabel className="text-gray-700">
                     I understand that this is a supportive service and not professional therapy.
                   </FormLabel>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </div>
               </FormItem>
             )}
@@ -318,7 +431,7 @@ export default function FriendlyForm() {
 
           <Button 
             type="submit" 
-            className="w-full"
+            className="w-full bg-[#B33771] hover:bg-[#9C296A] text-white py-2.5 text-md font-medium"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "Let's Talk!"}
