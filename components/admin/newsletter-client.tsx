@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { formatDistanceToNow } from "date-fns";
+import { enUS } from "date-fns/locale";
 import {
   Table,
   TableBody,
@@ -55,15 +56,29 @@ interface Subscriber {
 
 interface NewsletterPageProps {
   initialSubscribers: Subscriber[];
+  stats: {
+    total: number;
+    premium: number;
+    free: number;
+  };
 }
 
-export default function NewsletterPage({ initialSubscribers }: NewsletterPageProps) {
+export default function NewsletterPage({ initialSubscribers, stats }: NewsletterPageProps) {
   const [subscribers, setSubscribers] = useState<Subscriber[]>(initialSubscribers);
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [showComposer, setShowComposer] = useState(false);
   const [emailSubject, setEmailSubject] = useState("");
   const [emailContent, setEmailContent] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<'all' | 'premium' | 'free'>('all');
+  
+  // Filter subscribers based on the active filter
+  const filteredSubscribers = useMemo(() => {
+    if (activeFilter === 'all') return subscribers;
+    if (activeFilter === 'premium') return subscribers.filter(sub => sub.isPremium);
+    if (activeFilter === 'free') return subscribers.filter(sub => !sub.isPremium);
+    return subscribers;
+  }, [subscribers, activeFilter]);
 
   const handleSelectAll = () => {
     if (selectedEmails.size === subscribers.length) {
@@ -218,8 +233,12 @@ export default function NewsletterPage({ initialSubscribers }: NewsletterPagePro
       accessorKey: "createdAt",
       header: "Subscribed On",
       cell: ({ row }) => {
-        const date = row.getValue("createdAt") as Date;
-        return <span>{new Date(date).toLocaleDateString()}</span>;
+        const date = row.getValue("createdAt") as string;
+        return <span>{new Date(date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        })}</span>;
       },
     },
     {
@@ -272,11 +291,74 @@ export default function NewsletterPage({ initialSubscribers }: NewsletterPagePro
             <Mail className="w-4 h-4 mr-2" />
             Compose ({selectedEmails.size})
           </Button>
-          <Button asChild variant="outline">
-            <a href="/api/newsletter/export" download>
-              <Download className="w-4 h-4 mr-2" />
-              Export CSV
-            </a>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Download className="w-4 h-4 mr-2" />
+                Export CSV
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem asChild>
+                <a href="/api/newsletter/export" download>
+                  All Subscribers ({stats.total})
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href="/api/newsletter/export?type=premium" download>
+                  Premium Only ({stats.premium})
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href="/api/newsletter/export?type=free" download>
+                  Free Only ({stats.free})
+                </a>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+      
+      {/* Subscriber stats and filter tabs */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-lg p-4 shadow-sm border">
+        <div className="flex flex-wrap gap-4">
+          <div className="bg-gray-50 rounded-lg px-4 py-2">
+            <p className="text-xs text-gray-500">Total</p>
+            <p className="text-xl font-bold">{stats.total}</p>
+          </div>
+          <div className="bg-green-50 rounded-lg px-4 py-2">
+            <p className="text-xs text-gray-500">Premium</p>
+            <p className="text-xl font-bold text-green-700">{stats.premium}</p>
+          </div>
+          <div className="bg-blue-50 rounded-lg px-4 py-2">
+            <p className="text-xs text-gray-500">Free</p>
+            <p className="text-xl font-bold text-blue-700">{stats.free}</p>
+          </div>
+        </div>
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+          <Button 
+            variant={activeFilter === 'all' ? 'default' : 'ghost'} 
+            size="sm" 
+            onClick={() => setActiveFilter('all')}
+            className={activeFilter === 'all' ? 'bg-[#B33771] hover:bg-[#92295c]' : ''}
+          >
+            All
+          </Button>
+          <Button 
+            variant={activeFilter === 'premium' ? 'default' : 'ghost'} 
+            size="sm" 
+            onClick={() => setActiveFilter('premium')}
+            className={activeFilter === 'premium' ? 'bg-[#B33771] hover:bg-[#92295c]' : ''}
+          >
+            Premium
+          </Button>
+          <Button 
+            variant={activeFilter === 'free' ? 'default' : 'ghost'} 
+            size="sm" 
+            onClick={() => setActiveFilter('free')}
+            className={activeFilter === 'free' ? 'bg-[#B33771] hover:bg-[#92295c]' : ''}
+          >
+            Free
           </Button>
         </div>
       </div>
@@ -287,18 +369,20 @@ export default function NewsletterPage({ initialSubscribers }: NewsletterPagePro
             <TableRow>
               <TableHead className="w-12">
                 <Checkbox
-                  checked={selectedEmails.size === subscribers.length}
+                  checked={selectedEmails.size === filteredSubscribers.length}
                   onClick={handleSelectAll}
                 />
               </TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Subscription</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Subscribed</TableHead>
-              <TableHead>Last Updated</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {subscribers.map((subscriber) => (
+            {filteredSubscribers.map((subscriber) => (
               <TableRow key={subscriber.id}>
                 <TableCell>
                   <Checkbox
@@ -307,6 +391,27 @@ export default function NewsletterPage({ initialSubscribers }: NewsletterPagePro
                   />
                 </TableCell>
                 <TableCell>{subscriber.email}</TableCell>
+                <TableCell>{subscriber.name || '-'}</TableCell>
+                <TableCell>
+                  {subscriber.isPremium ? (
+                    <div className="flex flex-col">
+                      <Badge variant="success" className="mb-1">
+                        {subscriber.planType === "monthly" ? "Monthly" : "Yearly"}
+                      </Badge>
+                      {subscriber.planEnd && (
+                        <span className="text-xs text-gray-500">
+                          Expires: {new Date(subscriber.planEnd).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                          })}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <Badge variant="outline">Free</Badge>
+                  )}
+                </TableCell>
                 <TableCell>
                   <Badge
                     variant={subscriber.isVerified ? "success" : "default"}
@@ -315,17 +420,40 @@ export default function NewsletterPage({ initialSubscribers }: NewsletterPagePro
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {formatDistanceToNow(new Date(subscriber.createdAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(subscriber.createdAt), { 
+                    addSuffix: true,
+                    locale: enUS 
+                  })}
                 </TableCell>
                 <TableCell>
-                  {formatDistanceToNow(new Date(subscriber.updatedAt), { addSuffix: true })}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => handleDeleteSubscriber(subscriber.id)}>
+                        Delete
+                      </DropdownMenuItem>
+                      {!subscriber.isVerified && (
+                        <DropdownMenuItem
+                          onClick={() => handleResendVerification(subscriber.email)}
+                        >
+                          Resend Verification
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
 
-        {subscribers.length === 0 && (
+        {filteredSubscribers.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">No subscribers found</p>
           </div>
@@ -333,7 +461,12 @@ export default function NewsletterPage({ initialSubscribers }: NewsletterPagePro
       </div>
 
       <div className="text-sm text-gray-500">
-        Total Subscribers: {subscribers.length}
+        {activeFilter === 'all' 
+          ? `Showing all subscribers: ${filteredSubscribers.length}`
+          : activeFilter === 'premium'
+            ? `Showing premium subscribers: ${filteredSubscribers.length}`
+            : `Showing free subscribers: ${filteredSubscribers.length}`
+        }
       </div>
 
       <Dialog open={showComposer} onOpenChange={setShowComposer}>
