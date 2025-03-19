@@ -1,12 +1,160 @@
-// This is your Prisma schema file,
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model BuddyRequest {
+  id               String             @id @default(cuid())
+  type             BuddyRequestType
+  name             String
+  email            String
+  phone            String?
+  preferredDate    DateTime
+  mode             BuddyMode
+  message          String
+  extraInfo        String?
+  acknowledged     Boolean            @default(true)
+  status           BuddyRequestStatus @default(PENDING)
+  assignedBuddyId  String?
+  calendlyLink     String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  calendlyEventId  String?
+  calendlyEventUri String?
+  timeSlot         String
+  assignedBuddy    Buddy?             @relation(fields: [assignedBuddyId], references: [id])
+}
+
+model Buddy {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  phone         String?
+  calendlyLink  String
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  buddyRequests BuddyRequest[]
+}
+
+model Admin {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  isVerified    Boolean   @default(false)
+  twoFactorAuth Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  currentOTP    String?
+  otpExpiry     DateTime?
+}
+
+model Category {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  slug        String        @unique
+  description String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  isActive    Boolean       @default(true)
+  usageCount  Int           @default(0)
+  blogs       Blog[]        @relation("BlogToCategory")
+  library     LibraryItem[] @relation("CategoryToLibraryItem")
+  templates   Template[]    @relation("CategoryToTemplate")
+}
+
+model Blog {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  content     String
+  excerpt     String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  views       Int        @default(0)
+  coverImage  String?
+  publishedAt DateTime?
+  status      String     @default("draft")
+  categories  Category[] @relation("BlogToCategory")
+}
+
+model LibraryItem {
+  id           String      @id @default(cuid())
+  title        String
+  description  String
+  type         LibraryType
+  pdfUrl       String
+  coverImage   String
+  price        Decimal
+  published    Boolean     @default(false)
+  downloads    Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  previewPages Int         @default(3)
+  purchases    Purchase[]
+  categories   Category[]  @relation("CategoryToLibraryItem")
+}
+
+model Template {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  type        TemplateType
+  price       Decimal?
+  published   Boolean      @default(false)
+  downloads   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  imageUrl    String
+  purchases   Purchase[]
+  categories  Category[]   @relation("CategoryToTemplate")
+}
+
+model Purchase {
+  id            String         @id @default(cuid())
+  email         String
+  amount        Decimal
+  razorpayId    String         @unique
+  status        PurchaseStatus
+  libraryItemId String?
+  templateId    String?
+  downloadUrl   String?
+  urlExpiresAt  DateTime?
+  createdAt     DateTime       @default(now())
+  libraryItem   LibraryItem?   @relation(fields: [libraryItemId], references: [id])
+  template      Template?      @relation(fields: [templateId], references: [id])
+}
+
+model NewsletterSubscriber {
+  id         String    @id @default(cuid())
+  email      String    @unique
+  isVerified Boolean   @default(false)
+  token      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  isPremium  Boolean   @default(false)
+  name       String?
+  planEnd    DateTime?
+  planStart  DateTime?
+  planType   String?
+  payments   NewsletterPayment[]
+}
+
+model NewsletterPayment {
+  id             String         @id @default(cuid())
+  subscriberId   String
+  razorpayId     String         @unique
+  razorpayOrderId String        @unique
+  amount         Decimal
+  planType       String
+  status         PurchaseStatus
+  createdAt      DateTime       @default(now())
+  subscriber     NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
 }
 
 enum BuddyRequestType {
@@ -27,150 +175,18 @@ enum BuddyMode {
   VIDEO
 }
 
-model BuddyRequest {
-  id              String             @id @default(cuid())
-  type            BuddyRequestType
-  name            String
-  email           String
-  phone           String?
-  preferredDate   DateTime
-  timeSlot        String             // Changed from enum to String to store specific Calendly time
-  calendlyEventUri String?           // URI for the scheduled Calendly event
-  calendlyEventId String?            // Calendly event ID for reference
-  mode            BuddyMode
-  message         String             // For FRIENDLY requests, this is the initial message; for DETAILED, it holds the situation description.
-  extraInfo       String?            // Additional context for DETAILED requests, e.g., attempted solutions.
-  acknowledged    Boolean            @default(true)
-  status          BuddyRequestStatus @default(PENDING)
-  assignedBuddy   Buddy?             @relation(fields: [assignedBuddyId], references: [id])
-  assignedBuddyId String?
-  calendlyLink    String?            // Calendly scheduling link for the assigned buddy.
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-}
-
-model Buddy {
-  id            String         @id @default(cuid())
-  name          String
-  email         String         @unique
-  phone         String?
-  calendlyLink  String         // The Calendly scheduling URL for the buddy
-  isActive      Boolean        @default(true)
-  buddyRequests BuddyRequest[] // Requests assigned to this buddy
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-}
-
-model Admin {
-    id            String    @id @default(cuid())
-    email         String    @unique
-    password      String // Hashed password
-    name          String
-    isVerified    Boolean   @default(false)
-    twoFactorAuth Boolean   @default(true)
-    currentOTP    String?
-    otpExpiry     DateTime?
-    createdAt     DateTime  @default(now())
-    updatedAt     DateTime  @updatedAt
-}
-
-model Category {
-    id          String        @id @default(cuid())
-    name        String        @unique
-    slug        String        @unique
-    description String?
-    blogs       Blog[]
-    library     LibraryItem[]
-    templates   Template[]
-    createdAt   DateTime      @default(now())
-    updatedAt   DateTime      @updatedAt
-    isActive    Boolean       @default(true) // To soft-delete categories if needed
-    usageCount  Int           @default(0) // Track how often this category is used
-}
-
-model Blog {
-    id          String     @id @default(cuid())
-    title       String
-    slug        String     @unique
-    content     String     @db.Text
-    excerpt     String?    @db.Text
-    coverImage  String?
-    status      String     @default("draft")
-    views       Int        @default(0)
-    categories  Category[]
-    createdAt   DateTime   @default(now())
-    updatedAt   DateTime   @updatedAt
-    publishedAt DateTime?
-}
-
-model LibraryItem {
-    id          String      @id @default(cuid())
-    title       String
-    description String
-    type        LibraryType // EBOOK or GUIDE
-    pdfUrl      String // S3 URL to PDF file
-    coverImage  String // URL to cover image
-    price       Decimal // Price in INR
-    categories  Category[]
-    previewPages Int        @default(3)
-    published   Boolean     @default(false)
-    downloads   Int         @default(0)
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
-    purchases   Purchase[]
-}
-
-model Template {
-    id          String       @id @default(cuid())
-    title       String
-    description String
-    type        TemplateType // LETTER or ONELINER
-    imageUrl      String // S3 URL to PDF file
-    price       Decimal? // Null means free
-    categories  Category[]
-    published   Boolean      @default(false)
-    downloads   Int          @default(0)
-    createdAt   DateTime     @default(now())
-    updatedAt   DateTime     @updatedAt
-    purchases   Purchase[]
-}
-
-model Purchase {
-    id            String         @id @default(cuid())
-    email         String
-    amount        Decimal
-    razorpayId    String         @unique
-    status        PurchaseStatus
-    libraryItem   LibraryItem?   @relation(fields: [libraryItemId], references: [id])
-    libraryItemId String?
-    template      Template?      @relation(fields: [templateId], references: [id])
-    templateId    String?
-    downloadUrl   String? // Temporary signed URL for download
-    urlExpiresAt  DateTime? // Expiration time for download URL
-    createdAt     DateTime       @default(now())
-}
-
-model NewsletterSubscriber {
-  id         String    @id @default(cuid())
-  email      String    @unique
-  isVerified Boolean   @default(false)
-  token      String?   // For email verification
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-}
-
 enum LibraryType {
-    EBOOK
-    GUIDE
+  EBOOK
+  GUIDE
 }
 
 enum TemplateType {
-    LETTER
-    ONELINER
+  LETTER
+  ONELINER
 }
 
 enum PurchaseStatus {
-    PENDING
-    COMPLETED
-    FAILED
+  PENDING
+  COMPLETED
+  FAILED
 }
