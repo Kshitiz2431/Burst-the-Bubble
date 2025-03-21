@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 // Navigation items with their paths
 const navItems = [
@@ -19,9 +19,17 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   // Check if we're on the landing page
   const isLandingPage = pathname === "/";
+
+  useEffect(() => {
+    // Reset scroll state when navigating to the home page
+    if (isLandingPage) {
+      setIsScrolled(false);
+    }
+  }, [isLandingPage]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,6 +39,8 @@ export default function Navbar() {
     // Only add scroll listener on landing page
     if (isLandingPage) {
       window.addEventListener("scroll", handleScroll);
+      // Initial check for page refresh cases
+      handleScroll();
       return () => window.removeEventListener("scroll", handleScroll);
     } else {
       setIsScrolled(true); // Always show solid navbar on other pages
@@ -40,6 +50,11 @@ export default function Navbar() {
   // Handle navigation for hash links on landing page
   const handleNavClick = (path: string) => {
     setIsMenuOpen(false);
+
+    // Reset scroll state if going to homepage
+    if (path === "/") {
+      setIsScrolled(false);
+    }
 
     if (path.startsWith("/#") && isLandingPage) {
       const element = document.querySelector(path.substring(1));
@@ -65,6 +80,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           <Link
             href="/"
+            onClick={() => setIsScrolled(false)}
             className={`text-2xl font-bold transition-colors ${
               isScrolled || !isLandingPage ? "text-[#e27396]" : "text-white"
             }`}
@@ -94,7 +110,7 @@ export default function Navbar() {
                   : "bg-white text-[#e27396] hover:bg-white/90"
               }`}
             >
-              <Link href="/#features">Get Started</Link>
+              <Link href="/#features" onClick={() => handleNavClick("/#features")}>Get Started</Link>
             </button>
           </div>
 
@@ -135,7 +151,7 @@ export default function Navbar() {
                 </Link>
               ))}
               <button className="px-6 py-2 rounded-full bg-[#e27396] text-white hover:bg-[#d45c82] w-full">
-                <Link href="/#features">Get Started</Link>
+                <Link href="/#features" onClick={() => handleNavClick("/#features")}>Get Started</Link>
               </button>
             </div>
           </div>
