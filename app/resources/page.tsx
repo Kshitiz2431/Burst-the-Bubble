@@ -43,7 +43,7 @@ function ImageWithLoader({
       {/* Show spinner while loading */}
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-100">
-          <Loader2 className="w-8 h-8 animate-spin text-[#B33771]" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#e27396]" />
         </div>
       )}
 
@@ -59,7 +59,7 @@ function ImageWithLoader({
 
       {/* Resource type label */}
       <div className="absolute top-4 left-4 z-20">
-        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-white/90 text-[#B33771]">
+        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-white/90 text-[#e27396]">
           {resourceType.charAt(0).toUpperCase() + resourceType.slice(1)}
         </span>
       </div>
@@ -143,7 +143,7 @@ export default function ResourcesPage() {
           email: "user@example.com", // Replace with real user email
         },
         theme: {
-          color: "#92295c",
+          color: "#d45c82",
         },
       };
 
@@ -248,8 +248,8 @@ export default function ResourcesPage() {
           placeholder="Search by title, description, or content..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-4 rounded-full border-2 border-gray-100 focus:border-[#B33771] 
-                     focus:ring-1 focus:ring-[#B33771] outline-none shadow-sm"
+          className="w-full pl-12 pr-4 py-4 rounded-full border-2 border-gray-100 focus:border-[#e27396] 
+                     focus:ring-1 focus:ring-[#e27396] outline-none shadow-sm"
         />
       </div>
 
@@ -263,8 +263,8 @@ export default function ResourcesPage() {
               className={`group relative px-6 py-3 rounded-full transition-all
                 ${
                   selectedType === type.id
-                    ? "bg-[#92295c] text-white"
-                    : "text-gray-600 hover:bg-[#92295c]/10"
+                    ? "bg-[#d45c82] text-white"
+                    : "text-gray-600 hover:bg-[#e27396]/10"
                 }`}
             >
               <span className="relative z-10 font-medium">{type.label}</span>
@@ -286,7 +286,7 @@ export default function ResourcesPage() {
             className={`px-4 py-1.5 rounded-full text-sm transition-all
               ${
                 selectedCategory === "all"
-                  ? "bg-[#B33771]/10 text-[#B33771]"
+                  ? "bg-[#e27396]/10 text-[#e27396]"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
           >
@@ -299,7 +299,7 @@ export default function ResourcesPage() {
               className={`px-4 py-1.5 rounded-full text-sm transition-all
                 ${
                   selectedCategory === category.slug
-                    ? "bg-[#B33771]/10 text-[#B33771]"
+                    ? "bg-[#e27396]/10 text-[#e27396]"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
             >
@@ -312,7 +312,7 @@ export default function ResourcesPage() {
       {/* Resources Grid */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-[#B33771]" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#e27396]" />
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -354,7 +354,7 @@ export default function ResourcesPage() {
 
                   {/* Title */}
                   <h3
-                    className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-[#B33771] 
+                    className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-[#e27396] 
                              transition-colors line-clamp-2"
                   >
                     {resource.title}
@@ -368,7 +368,7 @@ export default function ResourcesPage() {
                   {/* Bottom Section: Price + Buttons */}
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
                     {resource.price !== undefined && (
-                      <span className="text-[#B33771] font-medium">
+                      <span className="text-[#e27396] font-medium">
                         {resource.price === 0 ? "Free" : `₹${resource.price}`}
                       </span>
                     )}
@@ -382,14 +382,14 @@ export default function ResourcesPage() {
                               setPreviewOpen(true);
                               setPreviewResource(resource);
                             }}
-                            className="px-4 py-2 rounded-lg bg-[#B33771]/10 text-[#B33771] font-medium hover:bg-[#B33771]/20 transition-colors"
+                            className="px-4 py-2 rounded-lg bg-[#e27396]/10 text-[#e27396] font-medium hover:bg-[#e27396]/20 transition-colors"
                           >
                             Preview
                           </button>
                           <button
                             onClick={() => handlePayment(resource)}
                             disabled={isProcessingPayment}
-                            className="px-4 py-2 rounded-lg bg-[#B33771]/10 text-[#B33771] font-medium hover:bg-[#B33771]/20 transition-colors"
+                            className="px-4 py-2 rounded-lg bg-[#e27396]/10 text-[#e27396] font-medium hover:bg-[#e27396]/20 transition-colors"
                           >
                             {isProcessingPayment ? "Processing..." : "Buy Now"}
                           </button>
@@ -398,7 +398,7 @@ export default function ResourcesPage() {
                       {resource.type === "blog" && (
                         <Link
                           href={`/blog/${resource.slug}`}
-                          className="px-4 py-2 rounded-lg bg-[#B33771]/10 text-[#B33771] font-medium hover:bg-[#B33771]/20 transition-colors"
+                          className="px-4 py-2 rounded-lg bg-[#e27396]/10 text-[#e27396] font-medium hover:bg-[#e27396]/20 transition-colors"
                         >
                           View Details
                         </Link>
@@ -451,16 +451,16 @@ export default function ResourcesPage() {
               itemTitle={currentPurchase.title}
             />
           )}
-        </div>
-      )}
 
-      {/* No Results */}
-      {!isLoading && filteredResources.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-600 text-lg">
-            No resources found matching your criteria. Try adjusting your search
-            or filters.
-          </p>
+          {/* No Results */}
+          {!isLoading && filteredResources.length === 0 && (
+            <div className="text-center py-12 col-span-3">
+              <p className="text-gray-600 text-lg">
+                No resources found matching your criteria. Try adjusting your search
+                or filters.
+              </p>
+            </div>
+          )}
         </div>
       )}
     </main>

@@ -192,7 +192,7 @@ export default function DetailedForm() {
     return (
       <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-[#B33771] mb-2">Schedule with {buddyName}</h2>
+          <h2 className="text-2xl font-bold text-[#e27396] mb-2">Schedule with {buddyName}</h2>
           <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
             Please select a convenient time slot from {buddyName}'s calendar. You'll receive a confirmation email once your appointment is scheduled.
           </p>
@@ -213,7 +213,7 @@ export default function DetailedForm() {
               setFormSubmitted(false);
               form.reset();
             }}
-            className="px-6 py-2 bg-white hover:bg-gray-50 text-[#B33771] border border-[#B33771] hover:border-[#9C296A] transition-colors duration-200"
+            className="px-6 py-2 bg-white hover:bg-gray-50 text-[#e27396] border border-[#e27396] hover:border-[#d45c82] transition-colors duration-200"
             variant="outline"
           >
             Go Back to Form
@@ -226,7 +226,7 @@ export default function DetailedForm() {
   return (
     <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold text-[#B33771] mb-2">Detailed Request Form</h2>
+        <h2 className="text-2xl font-bold text-[#e27396] mb-2">Detailed Request Form</h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
           Please provide more details to help our Buddies better understand your needs. This helps us match you with the most suitable buddy.
         </p>
@@ -246,7 +246,7 @@ export default function DetailedForm() {
                     <Input 
                       placeholder="Enter your full name"
                       {...field}
-                      className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
+                      className="border-gray-300 focus:border-[#e27396] focus:ring-[#e27396]"
                     />
                   </FormControl>
                   <FormMessage className="text-red-500" />
@@ -265,7 +265,7 @@ export default function DetailedForm() {
                     <Input 
                       placeholder="email@example.com"
                       {...field}
-                      className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
+                      className="border-gray-300 focus:border-[#e27396] focus:ring-[#e27396]"
                     />
                   </FormControl>
                   <FormMessage className="text-red-500" />
@@ -285,7 +285,7 @@ export default function DetailedForm() {
                   <Input 
                     placeholder="Your phone number"
                     {...field}
-                    className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
+                    className="border-gray-300 focus:border-[#e27396] focus:ring-[#e27396]"
                   />
                 </FormControl>
                 <FormDescription className="text-gray-500 text-sm">
@@ -329,7 +329,7 @@ export default function DetailedForm() {
                         onSelect={field.onChange}
                         disabled={(date) => date < new Date()}
                         initialFocus
-                        className="border-[#B33771]"
+                        className="border-[#e27396]"
                       />
                     </PopoverContent>
                   </Popover>
@@ -347,7 +347,7 @@ export default function DetailedForm() {
                   <FormLabel className="text-gray-700 font-medium">Preferred Time Slot</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]">
+                      <SelectTrigger className="border-gray-300 focus:border-[#e27396] focus:ring-[#e27396]">
                         <SelectValue placeholder="Select a time slot" />
                       </SelectTrigger>
                     </FormControl>
@@ -380,7 +380,7 @@ export default function DetailedForm() {
                         value="CHAT"
                         checked={field.value === "CHAT"}
                         onChange={() => field.onChange("CHAT")}
-                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
+                        className="h-4 w-4 text-[#e27396] focus:ring-[#e27396]"
                       />
                       <span className="text-gray-800">💬 Chat</span>
                     </label>
@@ -390,7 +390,7 @@ export default function DetailedForm() {
                         value="CALL"
                         checked={field.value === "CALL"}
                         onChange={() => field.onChange("CALL")}
-                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
+                        className="h-4 w-4 text-[#e27396] focus:ring-[#e27396]"
                       />
                       <span className="text-gray-800">📞 Call</span>
                     </label>
@@ -400,7 +400,7 @@ export default function DetailedForm() {
                         value="VIDEO"
                         checked={field.value === "VIDEO"}
                         onChange={() => field.onChange("VIDEO")}
-                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
+                        className="h-4 w-4 text-[#e27396] focus:ring-[#e27396]"
                       />
                       <span className="text-gray-800">🎥 Video Call</span>
                     </label>
@@ -421,7 +421,7 @@ export default function DetailedForm() {
                 <FormControl>
                   <Textarea
                     placeholder="Please describe your situation..."
-                    className="min-h-[120px] border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
+                    className="min-h-[120px] border-gray-300 focus:border-[#e27396] focus:ring-[#e27396]"
                     {...field}
                   />
                 </FormControl>
@@ -440,7 +440,7 @@ export default function DetailedForm() {
                 <FormControl>
                   <Textarea
                     placeholder="Tell us what you've already tried..."
-                    className="min-h-[120px] border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
+                    className="min-h-[120px] border-gray-300 focus:border-[#e27396] focus:ring-[#e27396]"
                     {...field}
                   />
                 </FormControl>
@@ -459,7 +459,7 @@ export default function DetailedForm() {
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-[#B33771] data-[state=checked]:border-[#B33771]"
+                    className="data-[state=checked]:bg-[#e27396] data-[state=checked]:border-[#e27396]"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -474,7 +474,7 @@ export default function DetailedForm() {
 
           <Button 
             type="submit" 
-            className="w-full bg-[#B33771] hover:bg-[#9C296A] text-white py-2.5 text-md font-medium"
+            className="w-full bg-[#e27396] hover:bg-[#d45c82] text-white py-2.5 text-md font-medium"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "Submit Request"}

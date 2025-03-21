@@ -57,17 +57,17 @@ const freeBenefits = [
   {
     title: "Weekly Love Tips",
     description: "Fresh insights and practical advice delivered to your inbox",
-    icon: <Mail className="w-6 h-6 text-[#85C1E9]" />,
+    icon: <Mail className="w-6 h-6 text-[#e27396]" />,
   },
   {
     title: "Love Letters Templates",
     description: "Basic templates to express your feelings",
-    icon: <BookOpen className="w-6 h-6 text-[#85C1E9]" />,
+    icon: <BookOpen className="w-6 h-6 text-[#e27396]" />,
   },
   {
     title: "Relationship Articles",
     description: "Access to our weekly free articles",
-    icon: <Star className="w-6 h-6 text-[#85C1E9]" />,
+    icon: <Star className="w-6 h-6 text-[#e27396]" />,
   }
 ];
 
@@ -75,32 +75,32 @@ const premiumBenefits = [
   {
     title: "Exclusive Content",
     description: "Premium in-depth relationship guides and case studies",
-    icon: <Star className="w-6 h-6 text-[#85C1E9]" />,
+    icon: <Star className="w-6 h-6 text-[#e27396]" />,
   },
   {
     title: "Premium Resources",
     description: "Download e-books and interactive relationship workbooks",
-    icon: <Gift className="w-6 h-6 text-[#85C1E9]" />,
+    icon: <Gift className="w-6 h-6 text-[#e27396]" />,
   },
   {
     title: "Early Access",
     description: "Be the first to access new features and premium content",
-    icon: <Clock className="w-6 h-6 text-[#85C1E9]" />,
+    icon: <Clock className="w-6 h-6 text-[#e27396]" />,
   },
   {
     title: "Private Community",
     description: "Join our exclusive community of premium subscribers",
-    icon: <Lock className="w-6 h-6 text-[#85C1E9]" />,
+    icon: <Lock className="w-6 h-6 text-[#e27396]" />,
   },
   {
     title: "Advanced Templates",
     description: "Access to our full library of premium templates",
-    icon: <BookOpen className="w-6 h-6 text-[#85C1E9]" />,
+    icon: <BookOpen className="w-6 h-6 text-[#e27396]" />,
   },
   {
     title: "Priority Support",
     description: "Get your relationship questions answered first",
-    icon: <Shield className="w-6 h-6 text-[#85C1E9]" />,
+    icon: <Shield className="w-6 h-6 text-[#e27396]" />,
   }
 ];
 
@@ -241,7 +241,7 @@ export default function NewsletterPage() {
           email: email,
         },
         theme: {
-          color: "#85C1E9",
+          color: "#e27396",
         },
       };
 
@@ -257,7 +257,7 @@ export default function NewsletterPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-white pt-24">
+    <main className="min-h-screen bg-gradient-to-br from-pink-50 to-white pt-24">
       {/* Add Razorpay script */}
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
@@ -278,7 +278,7 @@ export default function NewsletterPage() {
         >
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             The Relationship Newsletter <br />
-            <span className="text-[#85C1E9]">You've Been Waiting For</span>
+            <span className="text-[#e27396]">You've Been Waiting For</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             From casual dating advice to deep relationship insights,
@@ -310,7 +310,7 @@ export default function NewsletterPage() {
               <div className="space-y-4 mb-8">
                 {freeBenefits.map((benefit, index) => (
                   <div key={index} className="flex items-start">
-                    <div className="mt-1 mr-3 text-[#85C1E9]">
+                    <div className="mt-1 mr-3 text-[#e27396]">
                       <Check className="w-5 h-5" />
                     </div>
                     <div>
@@ -327,20 +327,20 @@ export default function NewsletterPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name (optional)"
-                  className="w-full px-4 py-3 rounded-lg text-gray-900 border border-gray-300 focus:outline-none focus:border-[#85C1E9] focus:ring-2 focus:ring-[#85C1E9]/20"
+                  className="w-full px-4 py-3 rounded-lg text-gray-900 border border-gray-300 focus:outline-none focus:border-[#e27396] focus:ring-2 focus:ring-[#e27396]/20"
                 />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
-                  className="w-full px-4 py-3 rounded-lg text-gray-900 border border-gray-300 focus:outline-none focus:border-[#85C1E9] focus:ring-2 focus:ring-[#85C1E9]/20"
+                  className="w-full px-4 py-3 rounded-lg text-gray-900 border border-gray-300 focus:outline-none focus:border-[#e27396] focus:ring-2 focus:ring-[#e27396]/20"
                   required
                 />
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full px-8 py-3 bg-[#85C1E9] text-white rounded-lg font-medium hover:bg-[#5DADE2] transition-colors disabled:opacity-50"
+                  className="w-full px-8 py-3 bg-[#e27396] text-white rounded-lg font-medium hover:bg-[#d45c82] transition-colors disabled:opacity-50"
                 >
                   {isLoading ? "Subscribing..." : "Subscribe for Free"}
                 </button>
@@ -349,13 +349,13 @@ export default function NewsletterPage() {
             
             {/* Premium Tier */}
             <motion.div 
-              className="bg-gradient-to-br from-[#85C1E9]/10 to-[#B39DDB]/10 rounded-2xl p-8 border border-[#85C1E9]/30 relative"
+              className="bg-gradient-to-br from-[#e27396]/10 to-[#de5c98]/10 rounded-2xl p-8 border border-[#e27396]/30 relative"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <div className="absolute -top-4 right-8 bg-[#85C1E9] text-white px-4 py-1 rounded-full text-sm font-medium">
+              <div className="absolute -top-4 right-8 bg-[#e27396] text-white px-4 py-1 rounded-full text-sm font-medium">
                 Recommended
               </div>
               
@@ -369,14 +369,14 @@ export default function NewsletterPage() {
                       key={plan.id}
                       className={`flex items-center border rounded-lg p-3 cursor-pointer transition-all
                       ${selectedPlan === plan.id 
-                        ? 'border-[#85C1E9] bg-[#85C1E9]/10' 
-                        : 'border-gray-200 hover:border-[#85C1E9]/50'}`}
+                        ? 'border-[#e27396] bg-[#e27396]/10' 
+                        : 'border-gray-200 hover:border-[#e27396]/50'}`}
                       onClick={() => setSelectedPlan(plan.id)}
                     >
                       <div className={`h-5 w-5 rounded-full border mr-3 flex items-center justify-center
-                        ${selectedPlan === plan.id ? 'border-[#85C1E9]' : 'border-gray-300'}`}>
+                        ${selectedPlan === plan.id ? 'border-[#e27396]' : 'border-gray-300'}`}>
                         {selectedPlan === plan.id && (
-                          <div className="h-3 w-3 rounded-full bg-[#85C1E9]"></div>
+                          <div className="h-3 w-3 rounded-full bg-[#e27396]"></div>
                         )}
                       </div>
                       <div className="flex-1">
@@ -395,7 +395,7 @@ export default function NewsletterPage() {
               <div className="space-y-4 mb-8">
                 {premiumBenefits.slice(0, 4).map((benefit, index) => (
                   <div key={index} className="flex items-start">
-                    <div className="mt-1 mr-3 text-[#85C1E9]">
+                    <div className="mt-1 mr-3 text-[#e27396]">
                       <Check className="w-5 h-5" />
                     </div>
                     <div>
@@ -404,12 +404,12 @@ export default function NewsletterPage() {
                     </div>
                   </div>
                 ))}
-                <div className="text-sm text-[#85C1E9] font-medium">+ {premiumBenefits.length - 4} more premium benefits</div>
+                <div className="text-sm text-[#e27396] font-medium">+ {premiumBenefits.length - 4} more premium benefits</div>
               </div>
               
               <button
                 onClick={handlePremiumSubscribe}
-                className="w-full px-8 py-3 bg-gradient-to-r from-[#85C1E9] to-[#B39DDB] text-white rounded-lg font-medium hover:from-[#5DADE2] hover:to-[#9575CD] transition-colors shadow-md disabled:opacity-50"
+                className="w-full px-8 py-3 bg-gradient-to-r from-[#e27396] to-[#de5c98] text-white rounded-lg font-medium hover:from-[#d45c82] hover:to-[#de5c98] transition-colors shadow-md disabled:opacity-50"
                 disabled={isLoading}
               >
                 {isLoading ? "Processing..." : "Get Premium Access"}
@@ -439,7 +439,7 @@ export default function NewsletterPage() {
                           hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-shadow duration-300"
               >
                 <div className="flex items-start">
-                  <div className="w-12 h-12 bg-[#85C1E9]/10 rounded-xl flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 bg-[#e27396]/10 rounded-xl flex items-center justify-center shrink-0">
                     {benefit.icon}
                   </div>
                   <div className="ml-4">
@@ -496,7 +496,7 @@ export default function NewsletterPage() {
           
           <div className="mt-12 text-center">
             <p className="text-gray-600 mb-4">Still have questions?</p>
-            <Link href="/contact-us" className="text-[#85C1E9] font-medium hover:underline">
+            <Link href="/contact-us" className="text-[#e27396] font-medium hover:underline">
               Contact our support team
             </Link>
           </div>
@@ -506,7 +506,7 @@ export default function NewsletterPage() {
       {subscriptionStatus && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-            <h2 className="text-2xl font-bold mb-4 text-[#B33771]">
+            <h2 className="text-2xl font-bold mb-4 text-[#e27396]">
               {subscriptionStatus.isPremium ? "Premium Subscription Active" : "Already Subscribed"}
             </h2>
             <p className="text-gray-600 mb-6">
@@ -523,7 +523,7 @@ export default function NewsletterPage() {
                 </p>
                 <button
                   onClick={() => setSubscriptionStatus(null)}
-                  className="w-full px-4 py-2 bg-[#85C1E9] text-white rounded-lg hover:bg-[#5DADE2] transition-colors"
+                  className="w-full px-4 py-2 bg-[#e27396] text-white rounded-lg hover:bg-[#d45c82] transition-colors"
                 >
                   Upgrade to Premium
                 </button>

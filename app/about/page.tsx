@@ -34,8 +34,8 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
             >
-              <div className="w-12 h-12 bg-[#B33771]/10 rounded-xl flex items-center justify-center mb-6">
-                <Target className="w-6 h-6 text-[#B33771]" />
+              <div className="w-12 h-12 bg-[#e27396]/10 rounded-xl flex items-center justify-center mb-6">
+                <Target className="w-6 h-6 text-[#e27396]" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 Our Mission
@@ -55,8 +55,8 @@ export default function AboutPage() {
               viewport={{ once: true }}
               className="bg-white rounded-2xl p-8 shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
             >
-              <div className="w-12 h-12 bg-[#B33771]/10 rounded-xl flex items-center justify-center mb-6">
-                <Compass className="w-6 h-6 text-[#B33771]" />
+              <div className="w-12 h-12 bg-[#e27396]/10 rounded-xl flex items-center justify-center mb-6">
+                <Compass className="w-6 h-6 text-[#e27396]" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
                 Our Vision

@@ -188,9 +188,9 @@ export default function FriendlyForm() {
     console.log("Form submitted, buddy URL:", buddyCalendlyUrl);
     
     return (
-      <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+      <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-[#B33771] mb-2">Schedule with {buddyName}</h2>
+          <h2 className="text-2xl font-bold text-[#e27396] mb-2">Schedule with {buddyName}</h2>
           <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
             Please select a convenient time slot from {buddyName}'s calendar. You'll receive a confirmation email once your appointment is scheduled.
           </p>
@@ -211,7 +211,7 @@ export default function FriendlyForm() {
               setFormSubmitted(false);
               form.reset();
             }}
-            className="px-6 py-2 bg-white hover:bg-gray-50 text-[#B33771] border border-[#B33771] hover:border-[#9C296A] transition-colors duration-200"
+            className="px-6 py-2 bg-white hover:bg-gray-50 text-[#e27396] border border-[#e27396] hover:border-[#d45c82] transition-colors duration-200"
             variant="outline"
           >
             Go Back to Form
@@ -222,16 +222,24 @@ export default function FriendlyForm() {
   }
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+    <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold text-[#B33771] mb-2">Friendly & Conversational Form</h2>
+        <h2 className="text-2xl font-bold text-[#e27396] mb-2">Let's Chat About Your Needs</h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          👋 Hey there! Let's get you connected with a Buddy who's ready to listen and help you burst your bubble!
+          👋 Hey there! We're here to help you navigate your relationships. Let's have a friendly conversation about what's on your mind!
         </p>
       </div>
 
+      <div className="mb-8">
+        <div className="flex justify-start mb-4">
+          <div className="bg-[#e27396]/10 rounded-2xl p-4 max-w-[80%] relative chat-bubble">
+            <p className="text-gray-800">What's your name? We'd love to get to know you!</p>
+          </div>
+        </div>
+      </div>
+
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Name Field */}
             <FormField
@@ -239,12 +247,11 @@ export default function FriendlyForm() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-700 font-medium">Your Name</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Enter your name" 
                       {...field} 
-                      className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]" 
+                      className="border-gray-300 focus:border-[#e27396] focus:ring-[#e27396] rounded-xl py-3" 
                     />
                   </FormControl>
                   <FormMessage className="text-red-500" />
@@ -258,18 +265,28 @@ export default function FriendlyForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-700 font-medium">Best Email to Reach You</FormLabel>
+                  <div className="flex justify-start mb-4">
+                    <div className="bg-[#e27396]/10 rounded-2xl p-4 max-w-[80%] relative chat-bubble">
+                      <p className="text-gray-800">Great! And what's the best email to reach you?</p>
+                    </div>
+                  </div>
                   <FormControl>
                     <Input 
-                      placeholder="email@example.com" 
+                      placeholder="your.email@example.com" 
                       {...field} 
-                      className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]" 
+                      className="border-gray-300 focus:border-[#e27396] focus:ring-[#e27396] rounded-xl py-3" 
                     />
                   </FormControl>
                   <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
+          </div>
+
+          <div className="flex justify-start mb-4">
+            <div className="bg-[#e27396]/10 rounded-2xl p-4 max-w-[80%] relative chat-bubble">
+              <p className="text-gray-800">When would you like to chat with one of our buddies?</p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -279,20 +296,19 @@ export default function FriendlyForm() {
               name="preferredDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel className="text-gray-700 font-medium">When would you like to chat?</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={"outline"}
-                          className={`w-full pl-3 text-left font-normal border-gray-300 hover:bg-gray-50 ${
+                          className={`w-full pl-3 text-left font-normal border-gray-300 hover:bg-gray-50 rounded-xl ${
                             !field.value && "text-gray-500"
                           }`}
                         >
                           {field.value ? (
                             format(field.value, "PPP")
                           ) : (
-                            <span>Select a date</span>
+                            <span>Pick a date</span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -305,7 +321,7 @@ export default function FriendlyForm() {
                         onSelect={field.onChange}
                         disabled={(date) => date < new Date()}
                         initialFocus
-                        className="border-[#B33771]"
+                        className="border-[#e27396]"
                       />
                     </PopoverContent>
                   </Popover>
@@ -320,11 +336,10 @@ export default function FriendlyForm() {
               name="timeSlot"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-700 font-medium">Preferred Time Slot</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]">
-                        <SelectValue placeholder="Select a time slot" />
+                      <SelectTrigger className="border-gray-300 focus:border-[#e27396] focus:ring-[#e27396] rounded-xl">
+                        <SelectValue placeholder="Select a time" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-white">
@@ -341,44 +356,49 @@ export default function FriendlyForm() {
             />
           </div>
 
+          <div className="flex justify-start mb-4">
+            <div className="bg-[#e27396]/10 rounded-2xl p-4 max-w-[80%] relative chat-bubble">
+              <p className="text-gray-800">How would you prefer to connect with your buddy?</p>
+            </div>
+          </div>
+
           {/* Communication Mode Field */}
           <FormField
             control={form.control}
             name="mode"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel className="text-gray-700 font-medium">How do you prefer to connect?</FormLabel>
                 <FormControl>
-                  <div className="flex flex-wrap space-x-6 items-center">
-                    <label className="flex items-center space-x-2 cursor-pointer">
+                  <div className="flex flex-wrap gap-4">
+                    <label className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl cursor-pointer transition-all ${field.value === "CHAT" ? "bg-[#e27396] text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-800"}`}>
                       <input
                         type="radio"
                         value="CHAT"
                         checked={field.value === "CHAT"}
                         onChange={() => field.onChange("CHAT")}
-                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
+                        className="sr-only"
                       />
-                      <span className="text-gray-800">💬 Chat</span>
+                      <span>💬 Chat</span>
                     </label>
-                    <label className="flex items-center space-x-2 cursor-pointer">
+                    <label className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl cursor-pointer transition-all ${field.value === "CALL" ? "bg-[#e27396] text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-800"}`}>
                       <input
                         type="radio"
                         value="CALL"
                         checked={field.value === "CALL"}
                         onChange={() => field.onChange("CALL")}
-                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
+                        className="sr-only"
                       />
-                      <span className="text-gray-800">📞 Call</span>
+                      <span>📞 Call</span>
                     </label>
-                    <label className="flex items-center space-x-2 cursor-pointer">
+                    <label className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl cursor-pointer transition-all ${field.value === "VIDEO" ? "bg-[#e27396] text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-800"}`}>
                       <input
                         type="radio"
                         value="VIDEO"
                         checked={field.value === "VIDEO"}
                         onChange={() => field.onChange("VIDEO")}
-                        className="h-4 w-4 text-[#B33771] focus:ring-[#B33771]"
+                        className="sr-only"
                       />
-                      <span className="text-gray-800">🎥 Video</span>
+                      <span>🎥 Video</span>
                     </label>
                   </div>
                 </FormControl>
@@ -387,17 +407,22 @@ export default function FriendlyForm() {
             )}
           />
 
+          <div className="flex justify-start mb-4">
+            <div className="bg-[#e27396]/10 rounded-2xl p-4 max-w-[80%] relative chat-bubble">
+              <p className="text-gray-800">Tell us what's on your mind. What would you like to talk about?</p>
+            </div>
+          </div>
+
           {/* Message Field */}
           <FormField
             control={form.control}
             name="message"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-gray-700 font-medium">Tell us a little about what's on your mind:</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="I'd like to talk about..."
-                    className="min-h-[120px] border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]"
+                    className="min-h-[120px] border-gray-300 focus:border-[#e27396] focus:ring-[#e27396] rounded-xl"
                     {...field}
                   />
                 </FormControl>
@@ -411,12 +436,12 @@ export default function FriendlyForm() {
             control={form.control}
             name="acknowledged"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 bg-[#e27396]/5 p-4 rounded-xl border border-[#e27396]/20">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    className="data-[state=checked]:bg-[#B33771] data-[state=checked]:border-[#B33771]"
+                    className="data-[state=checked]:bg-[#e27396] data-[state=checked]:border-[#e27396]"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
@@ -431,13 +456,28 @@ export default function FriendlyForm() {
 
           <Button 
             type="submit" 
-            className="w-full bg-[#B33771] hover:bg-[#9C296A] text-white py-2.5 text-md font-medium"
+            className="w-full bg-[#e27396] hover:bg-[#d45c82] text-white py-3 text-md font-medium rounded-xl"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Submitting..." : "Let's Talk!"}
+            {isSubmitting ? "Connecting you..." : "Let's Connect! 👋"}
           </Button>
         </form>
       </Form>
+
+      <style jsx global>{`
+        .chat-bubble:after {
+          content: '';
+          position: absolute;
+          left: -10px;
+          top: 15px;
+          width: 0;
+          height: 0;
+          border: 10px solid transparent;
+          border-right-color: rgba(226, 115, 150, 0.1);
+          border-left: 0;
+          margin-top: -10px;
+        }
+      `}</style>
     </div>
   );
 } 

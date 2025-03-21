@@ -44,7 +44,7 @@ export default function ContactPage() {
             </h2>
             <div className="space-y-6">
               <div className="flex items-center justify-center gap-4">
-                <div className="p-3 bg-[#B33771] rounded-full text-white">
+                <div className="p-3 bg-[#e27396] rounded-full text-white">
                   <Mail className="w-6 h-6" />
                 </div>
                 <span className="text-lg text-gray-800">
@@ -52,7 +52,7 @@ export default function ContactPage() {
                 </span>
               </div>
               <div className="flex items-center justify-center gap-4">
-                <div className="p-3 bg-[#B33771] rounded-full text-white">
+                <div className="p-3 bg-[#e27396] rounded-full text-white">
                   <Phone className="w-6 h-6" />
                 </div>
                 <span className="text-lg text-gray-800">1-800-BUBBLE</span>
@@ -81,7 +81,7 @@ export default function ContactPage() {
                   <a
                     key={social.label}
                     href="#"
-                    className="p-3 bg-gray-100 rounded-full hover:bg-[#B33771] hover:text-white transition-colors"
+                    className="p-3 bg-gray-100 rounded-full hover:bg-[#e27396] hover:text-white transition-colors"
                     aria-label={social.label}
                   >
                     {social.icon}

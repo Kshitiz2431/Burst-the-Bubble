@@ -66,7 +66,7 @@ export default function Navbar() {
           <Link
             href="/"
             className={`text-2xl font-bold transition-colors ${
-              isScrolled || !isLandingPage ? "text-[#B33771]" : "text-white"
+              isScrolled || !isLandingPage ? "text-[#e27396]" : "text-white"
             }`}
           >
             Burst the Bubble
@@ -80,7 +80,7 @@ export default function Navbar() {
                 onClick={() => handleNavClick(item.path)}
                 className={`transition-colors ${
                   isScrolled || !isLandingPage
-                    ? "text-gray-600 hover:text-[#B33771]"
+                    ? "text-gray-600 hover:text-[#e27396]"
                     : "text-white/80 hover:text-white"
                 } ${isActive(item.path) ? "font-medium" : ""}`}
               >
@@ -90,8 +90,8 @@ export default function Navbar() {
             <button
               className={`px-6 py-2 rounded-full transition-all ${
                 isScrolled || !isLandingPage
-                  ? "bg-[#B33771] text-white hover:bg-[#92295c]"
-                  : "bg-white text-[#B33771] hover:bg-white/90"
+                  ? "bg-[#e27396] text-white hover:bg-[#d45c82]"
+                  : "bg-white text-[#e27396] hover:bg-white/90"
               }`}
             >
               <Link href="/#features">Get Started</Link>
@@ -105,13 +105,13 @@ export default function Navbar() {
             {isMenuOpen ? (
               <X
                 className={
-                  isScrolled || !isLandingPage ? "text-[#B33771]" : "text-white"
+                  isScrolled || !isLandingPage ? "text-[#e27396]" : "text-white"
                 }
               />
             ) : (
               <Menu
                 className={
-                  isScrolled || !isLandingPage ? "text-[#B33771]" : "text-white"
+                  isScrolled || !isLandingPage ? "text-[#e27396]" : "text-white"
                 }
               />
             )}
@@ -127,14 +127,14 @@ export default function Navbar() {
                   key={item.name}
                   href={item.path}
                   onClick={() => handleNavClick(item.path)}
-                  className={`text-gray-600 hover:text-[#B33771] ${
+                  className={`text-gray-600 hover:text-[#e27396] ${
                     isActive(item.path) ? "font-medium" : ""
                   }`}
                 >
                   {item.name}
                 </Link>
               ))}
-              <button className="px-6 py-2 rounded-full bg-[#B33771] text-white hover:bg-[#92295c] w-full">
+              <button className="px-6 py-2 rounded-full bg-[#e27396] text-white hover:bg-[#d45c82] w-full">
                 <Link href="/#features">Get Started</Link>
               </button>
             </div>
