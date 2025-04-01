@@ -16,7 +16,7 @@ export default function AboutUsPreview() {
         </h2>
         <Link
           href="/about"
-          className="inline-flex items-center justify-center px-8 py-3 bg-[#B33771] text-white rounded-lg hover:bg-[#92295c] transition-colors font-medium group"
+          className="inline-flex items-center justify-center px-8 py-3 bg-[#e27396] text-white rounded-lg hover:bg-[#d45c82] transition-colors font-medium group"
         >
           Learn More
           <svg

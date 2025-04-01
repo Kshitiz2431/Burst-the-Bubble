@@ -12,7 +12,8 @@ const buddyRequestSchema = z.object({
   phone: z.string().optional(),
   preferredDate: z.string().or(z.date()),
   timeSlot: z.string(),
-  mode: z.enum(["CHAT", "CALL", "VIDEO"]),
+  mode: z.enum(["CHAT", "CALL"]),
+  duration: z.enum(["30", "60"]),
   message: z.string().min(10),
   extraInfo: z.string().optional(),
   acknowledged: z.boolean().refine(val => val === true, {
@@ -113,6 +114,7 @@ export async function POST(request: NextRequest) {
         preferredDate,
         timeSlot: validatedData.timeSlot,
         mode: validatedData.mode as BuddyMode,
+        duration: validatedData.duration,
         message: validatedData.message,
         extraInfo: validatedData.extraInfo || null,
         status: "ASSIGNED" as BuddyRequestStatus,

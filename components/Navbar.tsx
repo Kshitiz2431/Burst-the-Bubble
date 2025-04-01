@@ -11,8 +11,8 @@ const navItems = [
   { name: "About", path: "/about" },
   { name: "Resources", path: "/resources" },
   { name: "Newsletter", path: "/newsletter" },
+  {name:"Talk to Buddy",path:"/talk-to-buddy"},
   { name: "Contact Us", path: "/contact-us" },
-  {name:"Talk to Buddy",path:"/talk-to-buddy"}
 ];
 
 export default function Navbar() {

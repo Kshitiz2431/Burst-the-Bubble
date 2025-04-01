@@ -54,8 +54,11 @@ const formSchema = z.object({
   timeSlot: z.string({
     required_error: "Please select a time slot",
   }),
-  mode: z.enum(["CHAT", "CALL", "VIDEO"], {
+  mode: z.enum(["CHAT", "CALL"], {
     required_error: "Please select a communication mode",
+  }),
+  duration: z.enum(["30", "60"], {
+    required_error: "Please select a session duration",
   }),
   message: z.string().min(10, "Please provide more details (10 character minimum)"),
   extraInfo: z.string().optional(),
@@ -83,6 +86,7 @@ export default function DetailedForm() {
       message: "",
       extraInfo: "",
       mode: "CHAT",
+      duration: "30",
       timeSlot: "",
     },
   });
@@ -322,7 +326,7 @@ export default function DetailedForm() {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 bg-white rounded-lg shadow-lg" align="start">
                       <Calendar
                         mode="single"
                         selected={field.value}
@@ -370,10 +374,10 @@ export default function DetailedForm() {
             control={form.control}
             name="mode"
             render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormLabel className="text-gray-700 font-medium">Preferred Mode of Communication</FormLabel>
+              <FormItem>
+                <FormLabel className="text-gray-700 font-medium">Preferred Communication Mode</FormLabel>
                 <FormControl>
-                  <div className="flex flex-wrap space-x-6 items-center">
+                  <div className="flex flex-col space-y-2">
                     <label className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="radio"
@@ -382,7 +386,7 @@ export default function DetailedForm() {
                         onChange={() => field.onChange("CHAT")}
                         className="h-4 w-4 text-[#e27396] focus:ring-[#e27396]"
                       />
-                      <span className="text-gray-800">💬 Chat</span>
+                      <span className="text-gray-800">💬 Chat Session</span>
                     </label>
                     <label className="flex items-center space-x-2 cursor-pointer">
                       <input
@@ -394,15 +398,51 @@ export default function DetailedForm() {
                       />
                       <span className="text-gray-800">📞 Call</span>
                     </label>
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        value="VIDEO"
-                        checked={field.value === "VIDEO"}
-                        onChange={() => field.onChange("VIDEO")}
-                        className="h-4 w-4 text-[#e27396] focus:ring-[#e27396]"
-                      />
-                      <span className="text-gray-800">🎥 Video Call</span>
+                  </div>
+                </FormControl>
+                <FormMessage className="text-red-500" />
+              </FormItem>
+            )}
+          />
+
+          {/* Session Duration Field */}
+          <FormField
+            control={form.control}
+            name="duration"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-700 font-medium">Session Duration</FormLabel>
+                <FormControl>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <label className={`flex justify-between items-center p-3 rounded-md cursor-pointer border ${field.value === "30" ? "border-[#e27396] bg-[#e27396]/5" : "border-gray-200 hover:border-[#e27396]/50"}`}>
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          value="30"
+                          checked={field.value === "30"}
+                          onChange={() => field.onChange("30")}
+                          className="h-4 w-4 text-[#e27396] focus:ring-[#e27396]"
+                        />
+                        <span className="ml-2 text-gray-800">30 Minutes</span>
+                      </div>
+                      <span className="text-[#e27396] font-medium">
+                        {form.getValues("mode") === "CHAT" ? "₹299" : "₹399"}
+                      </span>
+                    </label>
+                    <label className={`flex justify-between items-center p-3 rounded-md cursor-pointer border ${field.value === "60" ? "border-[#e27396] bg-[#e27396]/5" : "border-gray-200 hover:border-[#e27396]/50"}`}>
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          value="60"
+                          checked={field.value === "60"}
+                          onChange={() => field.onChange("60")}
+                          className="h-4 w-4 text-[#e27396] focus:ring-[#e27396]"
+                        />
+                        <span className="ml-2 text-gray-800">60 Minutes</span>
+                      </div>
+                      <span className="text-[#e27396] font-medium">
+                        {form.getValues("mode") === "CHAT" ? "₹499" : "₹599"}
+                      </span>
                     </label>
                   </div>
                 </FormControl>

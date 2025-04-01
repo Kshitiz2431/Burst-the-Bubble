@@ -15,6 +15,7 @@ model BuddyRequest {
   phone            String?
   preferredDate    DateTime
   mode             BuddyMode
+  duration         String             // "30" or "60" minutes
   message          String
   extraInfo        String?
   acknowledged     Boolean            @default(true)
@@ -172,7 +173,6 @@ enum BuddyRequestStatus {
 enum BuddyMode {
   CHAT
   CALL
-  VIDEO
 }
 
 enum LibraryType {

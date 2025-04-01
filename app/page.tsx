@@ -28,7 +28,7 @@ export default function Home() {
       <FeatureCards />
 
       {/* Newsletter Section */}
-      <NewsletterPage />
+      {/* <NewsletterPage /> */}
 
       {/* About Us Preview Section */}
       <AboutUsPreview />

@@ -224,9 +224,9 @@ export default function ResourcesPage() {
 
   const resourceTypes = [
     { id: "all", label: "All Resources" },
-    { id: "blog", label: "Articles & Guides" },
-    { id: "library", label: "E-Books & PDFs" },
-    { id: "template", label: "Templates" },
+    { id: "blog", label: "Blogs" },
+    { id: "library", label: "Love Library" },
+    { id: "template", label: "Love helpers" },
   ];
 
   return (

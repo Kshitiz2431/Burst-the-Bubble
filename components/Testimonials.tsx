@@ -60,11 +60,11 @@ const Testimonials = () => {
                         hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all"
             >
               <div className="flex flex-col h-full">
-                <Quote className="w-10 h-10 text-[#B33771] mb-4" />
+                <Quote className="w-10 h-10 text-[#e27396] mb-4" />
                 <p className="text-gray-600 leading-relaxed italic mb-6 flex-grow">
                   &quot;{testimonial.quote}&quot;
                 </p>
-                <p className="text-[#B33771] font-medium">
+                <p className="text-[#e27396] font-medium">
                   {testimonial.author}
                 </p>
               </div>

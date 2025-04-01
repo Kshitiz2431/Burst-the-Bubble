@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { enUS } from "date-fns/locale";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -54,8 +55,11 @@ const formSchema = z.object({
   timeSlot: z.string({
     required_error: "Please select a time slot",
   }),
-  mode: z.enum(["CHAT", "CALL", "VIDEO"], {
+  mode: z.enum(["CHAT", "CALL"], {
     required_error: "Please select a communication mode",
+  }),
+  duration: z.enum(["30", "60"], {
+    required_error: "Please select a session duration",
   }),
   message: z.string().min(10, "Please tell us a bit more (10 character minimum)"),
   acknowledged: z.literal(true, {
@@ -80,6 +84,7 @@ export default function FriendlyForm() {
       email: "",
       message: "",
       mode: "CHAT",
+      duration: "30",
       timeSlot: "",
     },
   });
@@ -314,8 +319,10 @@ export default function FriendlyForm() {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                    <PopoverContent className="w-auto p-0 bg-white rounded-lg shadow-lg" align="start">
                       <Calendar
+                        locale={enUS}
+                        weekStartsOn={0}
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
@@ -390,15 +397,52 @@ export default function FriendlyForm() {
                       />
                       <span>📞 Call</span>
                     </label>
-                    <label className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl cursor-pointer transition-all ${field.value === "VIDEO" ? "bg-[#e27396] text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-800"}`}>
+                  </div>
+                </FormControl>
+                <FormMessage className="text-red-500" />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-start mb-4">
+            <div className="bg-[#e27396]/10 rounded-2xl p-4 max-w-[80%] relative chat-bubble">
+              <p className="text-gray-800">How long would you like your session to be?</p>
+            </div>
+          </div>
+
+          {/* Duration Field */}
+          <FormField
+            control={form.control}
+            name="duration"
+            render={({ field }) => (
+              <FormItem className="space-y-3">
+                <FormControl>
+                  <div className="flex flex-wrap gap-4">
+                    <label className={`flex flex-col items-center justify-center gap-2 px-5 py-3 rounded-xl cursor-pointer transition-all ${field.value === "30" ? "bg-[#e27396] text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-800"}`}>
                       <input
                         type="radio"
-                        value="VIDEO"
-                        checked={field.value === "VIDEO"}
-                        onChange={() => field.onChange("VIDEO")}
+                        value="30"
+                        checked={field.value === "30"}
+                        onChange={() => field.onChange("30")}
                         className="sr-only"
                       />
-                      <span>🎥 Video</span>
+                      <span className="font-medium">30 Minutes</span>
+                      <span className={`text-sm ${field.value === "30" ? "text-white/80" : "text-gray-500"}`}>
+                        {form.getValues("mode") === "CHAT" ? "₹299" : "₹399"}
+                      </span>
+                    </label>
+                    <label className={`flex flex-col items-center justify-center gap-2 px-5 py-3 rounded-xl cursor-pointer transition-all ${field.value === "60" ? "bg-[#e27396] text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-800"}`}>
+                      <input
+                        type="radio"
+                        value="60"
+                        checked={field.value === "60"}
+                        onChange={() => field.onChange("60")}
+                        className="sr-only"
+                      />
+                      <span className="font-medium">60 Minutes</span>
+                      <span className={`text-sm ${field.value === "60" ? "text-white/80" : "text-gray-500"}`}>
+                        {form.getValues("mode") === "CHAT" ? "₹499" : "₹599"}
+                      </span>
                     </label>
                   </div>
                 </FormControl>
