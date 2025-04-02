@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="96" cy="96" r="90" fill="#e27396" fill-opacity="0.1"/>
+  
+  <!-- Warning Triangle -->
+  <path d="M96 60L140 140H52L96 60Z" fill="#e27396" fill-opacity="0.2"/>
+  
+  <!-- Exclamation Mark -->
+  <path d="M96 80V100" stroke="#e27396" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="96" cy="110" r="4" fill="#e27396"/>
+</svg> 

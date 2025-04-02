@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="96" cy="96" r="90" fill="#e27396" fill-opacity="0.1"/>
+  
+  <!-- Speech Bubbles -->
+  <path d="M60 80C60 74.4772 64.4772 70 70 70H90C95.5228 70 100 74.4772 100 80V100C100 105.523 95.5228 110 90 110H70C64.4772 110 60 105.523 60 100V80Z" fill="#e27396" fill-opacity="0.2"/>
+  <path d="M92 80C92 74.4772 96.4772 70 102 70H122C127.523 70 132 74.4772 132 80V100C132 105.523 127.523 110 122 110H102C96.4772 110 92 105.523 92 100V80Z" fill="#e27396" fill-opacity="0.2"/>
+  
+  <!-- Connection Lines -->
+  <path d="M90 90H102" stroke="#e27396" stroke-width="2" stroke-linecap="round"/>
+  <path d="M90 100H102" stroke="#e27396" stroke-width="2" stroke-linecap="round"/>
+</svg> 

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import Script from "next/script";
 import {
   Popover,
   PopoverContent,
@@ -71,9 +72,13 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function DetailedForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [buddyName, setBuddyName] = useState("");
   const [buddyCalendlyUrl, setBuddyCalendlyUrl] = useState("");
+  const [requestId, setRequestId] = useState("");
+  const [shouldInitiatePayment, setShouldInitiatePayment] = useState(false);
   const calendlyContainerRef = useRef<HTMLDivElement>(null);
 
   // Initialize form
@@ -91,9 +96,18 @@ export default function DetailedForm() {
     },
   });
 
+  // Effect to handle payment after form submission
+  useEffect(() => {
+    if (shouldInitiatePayment && requestId) {
+      console.log("Initiating payment for requestId:", requestId);
+      handlePayment();
+      setShouldInitiatePayment(false);
+    }
+  }, [shouldInitiatePayment, requestId]);
+
   // Load Calendly widget script
   useEffect(() => {
-    if (formSubmitted && buddyCalendlyUrl) {
+    if (formSubmitted && paymentCompleted && buddyCalendlyUrl) {
       // Clean up any existing scripts to avoid duplicates
       const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]');
       if (existingScript) {
@@ -133,7 +147,101 @@ export default function DetailedForm() {
         }
       };
     }
-  }, [formSubmitted, buddyCalendlyUrl, form]);
+  }, [formSubmitted, paymentCompleted, buddyCalendlyUrl, form]);
+
+  // Handle payment with Razorpay
+  const handlePayment = async () => {
+    try {
+      setIsPaymentProcessing(true);
+      
+      console.log("Starting payment with requestId:", requestId);
+      
+      // Create order
+      const orderResponse = await fetch("/api/buddy-payment/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          requestId: requestId,
+          email: form.getValues("email"),
+          name: form.getValues("name"),
+          mode: form.getValues("mode"),
+          duration: form.getValues("duration"),
+        }),
+      });
+      
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json();
+        console.error("Payment order creation failed:", errorData);
+        throw new Error(errorData.message || "Failed to create payment order");
+      }
+      
+      const orderData = await orderResponse.json();
+      console.log("Order created successfully:", orderData);
+      
+      // Initialize Razorpay
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Burst The Bubble",
+        description: `Buddy Session (${form.getValues("mode")} - ${form.getValues("duration")} mins)`,
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          try {
+            // Verify payment
+            const verifyResponse = await fetch("/api/buddy-payment/verify", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            
+            if (!verifyResponse.ok) {
+              const errorData = await verifyResponse.json();
+              throw new Error(errorData.message || "Failed to verify payment");
+            }
+            
+            const verifyData = await verifyResponse.json();
+            toast.success("Payment successful! You can now schedule your session.");
+            setPaymentCompleted(true);
+            
+            // Update buddy URL if it's in the response
+            if (verifyData.calendlyUrl) {
+              setBuddyCalendlyUrl(verifyData.calendlyUrl);
+            }
+            
+          } catch (error) {
+            console.error("Payment verification error:", error);
+            toast.error("Payment verification failed. Please try again.");
+          }
+        },
+        prefill: {
+          name: form.getValues("name"),
+          email: form.getValues("email"),
+          contact: form.getValues("phone") || "",
+        },
+        theme: {
+          color: "#e27396",
+        },
+      };
+      
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+      
+    } catch (error) {
+      console.error("Payment processing error:", error);
+      toast.error("Payment processing failed. Please try again.");
+    } finally {
+      setIsPaymentProcessing(false);
+    }
+  };
 
   // Form submission handler
   const onSubmit = async (data: FormValues) => {
@@ -172,14 +280,17 @@ export default function DetailedForm() {
         // Default Calendly URL if none is provided in the response
         const calendlyUrl = result.buddyCalendlyLink || 'https://calendly.com/burst-the-bubble/buddy-session';
         
-        console.log("Setting buddy info:", {
-          name: result.buddyName,
-          calendlyUrl: calendlyUrl
+        console.log("API Response Details:", {
+          requestId: result.requestId,
+          buddyName: result.buddyName,
+          buddyCalendlyLink: result.buddyCalendlyLink
         });
         
         setBuddyName(result.buddyName);
         setBuddyCalendlyUrl(calendlyUrl);
+        setRequestId(result.requestId);
         setFormSubmitted(true);
+        setShouldInitiatePayment(true);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -189,38 +300,106 @@ export default function DetailedForm() {
     }
   };
 
-  // Show the Calendly scheduling widget if the form has been submitted
+  // Handle displaying the form, payment, or Calendly
   if (formSubmitted) {
-    console.log("Form submitted, buddy URL:", buddyCalendlyUrl);
+    // If payment completed, show Calendly
+    if (paymentCompleted) {
+      return (
+        <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-[#e27396] mb-2">Schedule with {buddyName}</h2>
+            <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
+              Please select a convenient time slot from {buddyName}'s calendar. You'll receive a confirmation email once your appointment is scheduled.
+            </p>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden mb-8">
+            <div 
+              ref={calendlyContainerRef} 
+              id="calendly-inline-widget"
+              className="w-full"
+              style={{ height: "calc(100vh - 300px)", minHeight: "800px", maxHeight: "1000px" }}
+            ></div>
+          </div>
+          
+          <div className="text-center">
+            <Button 
+              onClick={() => {
+                setFormSubmitted(false);
+                setPaymentCompleted(false);
+                form.reset();
+              }}
+              className="px-6 py-2 bg-white hover:bg-gray-50 text-[#e27396] border border-[#e27396] hover:border-[#d45c82] transition-colors duration-200"
+              variant="outline"
+            >
+              Go Back to Form
+            </Button>
+          </div>
+        </div>
+      );
+    }
     
+    // Show payment screen
     return (
       <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+        <Script 
+          src="https://checkout.razorpay.com/v1/checkout.js"
+          strategy="lazyOnload"
+        />
+        
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-[#e27396] mb-2">Schedule with {buddyName}</h2>
+          <h2 className="text-2xl font-bold text-[#e27396] mb-2">Complete Your Payment</h2>
           <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
-            Please select a convenient time slot from {buddyName}'s calendar. You'll receive a confirmation email once your appointment is scheduled.
+            You're almost there! Complete the payment to schedule your session with {buddyName}.
           </p>
         </div>
         
-        <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden mb-8">
-          <div 
-            ref={calendlyContainerRef} 
-            id="calendly-inline-widget"
-            className="w-full"
-            style={{ height: "calc(100vh - 300px)", minHeight: "800px", maxHeight: "1000px" }}
-          ></div>
+        <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Session Details</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Session Type:</span>
+              <span className="font-medium">
+                {form.getValues("mode") === "CHAT" ? "💬 Chat Session" : "📞 Call Session"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Duration:</span>
+              <span className="font-medium">{form.getValues("duration")} minutes</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Buddy:</span>
+              <span className="font-medium">{buddyName}</span>
+            </div>
+            <div className="border-t border-gray-200 my-2 pt-2"></div>
+            <div className="flex justify-between">
+              <span className="text-gray-800 font-medium">Total Amount:</span>
+              <span className="text-[#e27396] font-bold">
+                ₹{form.getValues("mode") === "CHAT" 
+                  ? (form.getValues("duration") === "30" ? "299" : "499") 
+                  : (form.getValues("duration") === "30" ? "399" : "599")}
+              </span>
+            </div>
+          </div>
         </div>
         
-        <div className="text-center">
+        <div className="flex flex-col space-y-4">
+          <Button 
+            onClick={handlePayment}
+            className="w-full bg-[#e27396] hover:bg-[#d45c82] text-white py-2.5 text-md font-medium"
+            disabled={isPaymentProcessing || !requestId}
+          >
+            {isPaymentProcessing ? "Processing..." : "Pay Now"}
+          </Button>
+          
           <Button 
             onClick={() => {
               setFormSubmitted(false);
-              form.reset();
             }}
-            className="px-6 py-2 bg-white hover:bg-gray-50 text-[#e27396] border border-[#e27396] hover:border-[#d45c82] transition-colors duration-200"
+            className="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 py-2.5 text-md font-medium"
             variant="outline"
           >
-            Go Back to Form
+            Go Back
           </Button>
         </div>
       </div>

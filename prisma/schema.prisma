@@ -28,6 +28,7 @@ model BuddyRequest {
   calendlyEventUri String?
   timeSlot         String
   assignedBuddy    Buddy?             @relation(fields: [assignedBuddyId], references: [id])
+  payment          BuddyPayment?
 }
 
 model Buddy {
@@ -156,6 +157,19 @@ model NewsletterPayment {
   status         PurchaseStatus
   createdAt      DateTime       @default(now())
   subscriber     NewsletterSubscriber @relation(fields: [subscriberId], references: [id])
+}
+
+model BuddyPayment {
+  id              String         @id @default(cuid())
+  buddyRequestId  String         @unique
+  razorpayOrderId String         @unique
+  razorpayPaymentId String?      @unique
+  razorpaySignature String?
+  amount          Decimal
+  status          PurchaseStatus @default(PENDING)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  buddyRequest    BuddyRequest   @relation(fields: [buddyRequestId], references: [id])
 }
 
 enum BuddyRequestType {

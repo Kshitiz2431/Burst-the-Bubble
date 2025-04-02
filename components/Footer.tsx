@@ -102,14 +102,14 @@ const Footer = () => {
                 <Mail className="w-5 h-5" />
                 <span>infoburstthebubble@gmail.com</span>
               </li>
-              <li className="flex items-center gap-2 text-gray-300">
+              {/* <li className="flex items-center gap-2 text-gray-300">
                 <Phone className="w-5 h-5" />
                 <span>1-800-BUBBLE</span>
-              </li>
-              <li className="flex items-center gap-2 text-gray-300">
+              </li> */}
+              {/* <li className="flex items-center gap-2 text-gray-300">
                 <MapPin className="w-5 h-5" />
                 <span>123 Love Street</span>
-              </li>
+              </li> */}
             </ul>
           </div>
 

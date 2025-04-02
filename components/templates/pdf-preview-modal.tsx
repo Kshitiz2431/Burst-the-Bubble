@@ -1,9 +1,8 @@
-// components/templates/image-preview-modal.tsx
 import * as React from "react";
-import { Dialog, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
+import { Dialog, DialogOverlay, DialogPortal, DialogContent } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
-import { X, ZoomIn, ZoomOut } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -29,31 +28,37 @@ const CustomDialogContent = React.forwardRef<
 ));
 CustomDialogContent.displayName = "CustomDialogContent";
 
-interface ImagePreviewModalProps {
+interface PDFPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  imageUrl: string;
+  pdfUrl: string;
   title: string;
+  totalPages: number;
 }
 
-export function ImagePreviewModal({
+export function PDFPreviewModal({
   isOpen,
   onClose,
-  imageUrl,
+  pdfUrl,
   title,
-}: ImagePreviewModalProps) {
+  totalPages,
+}: PDFPreviewModalProps) {
   const [loading, setLoading] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  
-  const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 0.25, 2));
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
   };
-  
-  const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 0.25, 0.5));
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
   };
-  
-  const handleImageLoad = () => {
+
+  const handleIframeLoad = () => {
     setLoading(false);
   };
 
@@ -82,27 +87,30 @@ export function ImagePreviewModal({
           </Button>
         </motion.div>
 
-        {/* Image Viewer */}
+        {/* PDF Viewer */}
         <div className="flex-1 overflow-auto p-6 bg-gray-50/50 backdrop-blur-sm flex items-center justify-center relative">
-          {/* Zoom controls */}
-          <div className="absolute top-4 right-4 flex gap-2 z-10">
+          {/* Navigation buttons */}
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
             <Button
               variant="outline"
-              size="sm"
-              onClick={handleZoomOut}
-              disabled={zoomLevel <= 0.5}
-              className="h-8 w-8 p-0 rounded-full bg-white/80 backdrop-blur-sm border-gray-200 hover:border-[#e27396]/20"
+              size="icon"
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1}
+              className="h-10 w-10 rounded-full bg-white/80 backdrop-blur-sm border-gray-200 hover:border-[#e27396]/20"
             >
-              <ZoomOut className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             </Button>
+          </div>
+          
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 z-10">
             <Button
               variant="outline"
-              size="sm"
-              onClick={handleZoomIn}
-              disabled={zoomLevel >= 2}
-              className="h-8 w-8 p-0 rounded-full bg-white/80 backdrop-blur-sm border-gray-200 hover:border-[#e27396]/20"
+              size="icon"
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages}
+              className="h-10 w-10 rounded-full bg-white/80 backdrop-blur-sm border-gray-200 hover:border-[#e27396]/20"
             >
-              <ZoomIn className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
           
@@ -117,32 +125,35 @@ export function ImagePreviewModal({
             </div>
           )}
           
-          {/* Image container */}
+          {/* PDF container */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: loading ? 0 : 1 }}
             transition={{ duration: 0.3 }}
-            className="relative rounded-xl overflow-hidden shadow-lg max-w-full max-h-full bg-white/50 backdrop-blur-sm"
+            className="relative rounded-xl overflow-hidden shadow-lg w-full h-full bg-white"
           >
-            <div className="overflow-hidden p-1">
-              <img 
-                src={imageUrl} 
-                alt={title}
-                className="max-w-full max-h-full object-contain transition-transform duration-300 ease-out"
-                style={{ transform: `scale(${zoomLevel})` }}
-                onLoad={handleImageLoad}
-              />
-            </div>
-            
-            {/* Zoom indicator */}
-            {zoomLevel !== 1 && (
-              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-                {Math.round(zoomLevel * 100)}%
-              </div>
-            )}
+            <iframe
+              src={`${pdfUrl}#page=${currentPage}`}
+              title={title}
+              className="w-full h-full"
+              onLoad={handleIframeLoad}
+            />
           </motion.div>
         </div>
+        
+        {/* Footer with page indicator */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 border-t border-gray-100 bg-white/80 backdrop-blur-sm flex items-center justify-center"
+        >
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium text-[#e27396]">{currentPage}</span>
+            <span>/</span>
+            <span>{totalPages}</span>
+          </div>
+        </motion.div>
       </CustomDialogContent>
     </Dialog>
   );
-}
+} 
