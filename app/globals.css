@@ -10,7 +10,6 @@
 
 /* Bubble styles */
 /* Add to your globals.css */
-/* Add to your globals.css */
 .bubble {
   position: absolute;
   border-radius: 50%;
@@ -25,6 +24,17 @@
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2),
     inset 0 0 10px rgba(255, 255, 255, 0.2);
   transform-origin: center center;
+  /* Safari performance optimizations */
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
+}
+
+/* Safari-specific optimizations */
+.safari-optimized .bubble {
+  border-width: 1px;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.15),
+    inset 0 0 5px rgba(255, 255, 255, 0.15);
 }
 
 .bubble::before {
@@ -37,6 +47,11 @@
   top: 15%;
   left: 15%;
   filter: blur(1px);
+}
+
+/* Safari-specific optimizations */
+.safari-optimized .bubble::before {
+  filter: none; /* Remove blur in Safari for better performance */
 }
 
 .bubble::after {
@@ -52,6 +67,11 @@
   filter: blur(1px);
 }
 
+/* Safari-specific optimizations */
+.safari-optimized .bubble::after {
+  filter: none; /* Remove blur in Safari for better performance */
+}
+
 .bubble > div {
   position: absolute;
   inset: 0;
@@ -64,12 +84,21 @@
   filter: blur(2px);
 }
 
+/* Safari-specific optimizations */
+.safari-optimized .bubble > div {
+  filter: none; /* Remove blur in Safari for better performance */
+}
+
 .bubble-particle {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.8);
   pointer-events: none;
   will-change: transform;
+  /* Safari performance optimizations */
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
 }
 
 @keyframes float {

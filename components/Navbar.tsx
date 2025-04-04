@@ -103,7 +103,7 @@ export default function Navbar() {
                 {item.name}
               </Link>
             ))}
-            <button
+            {/* <button
               className={`px-6 py-2 rounded-full transition-all ${
                 isScrolled || !isLandingPage
                   ? "bg-[#e27396] text-white hover:bg-[#d45c82]"
@@ -111,7 +111,7 @@ export default function Navbar() {
               }`}
             >
               <Link href="/#features" onClick={() => handleNavClick("/#features")}>Get Started</Link>
-            </button>
+            </button> */}
           </div>
 
           <button

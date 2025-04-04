@@ -5,12 +5,21 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-interface DeleteButtonProps {
-  categoryId: string;
-  disabled: boolean;
+interface ItemCounts {
+  blogs?: number;
+  library?: number;
+  templates?: number;
 }
 
-export function DeleteButton({ categoryId, disabled }: DeleteButtonProps) {
+export function DeleteButton({
+  categoryId,
+  disabled = false,
+  itemCounts,
+}: {
+  categoryId: string;
+  disabled?: boolean;
+  itemCounts: ItemCounts;
+}) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -36,20 +45,40 @@ export function DeleteButton({ categoryId, disabled }: DeleteButtonProps) {
     }
   };
 
+  // Generate tooltip message based on associated items
+  const getTooltipMessage = () => {
+    if (itemCounts?.blogs && itemCounts.blogs > 0) {
+      return `Cannot delete - has ${itemCounts.blogs} associated blog${
+        itemCounts.blogs === 1 ? "" : "s"
+      }`;
+    }
+    
+    if (itemCounts?.templates && itemCounts.templates > 0) {
+      return `Cannot delete - has ${itemCounts.templates} associated template${
+        itemCounts.templates === 1 ? "" : "s"
+      }`;
+    }
+
+    return "Delete category";
+  };
+
+  // Check if the delete button should be disabled
+  const isDisabled =
+    disabled ||
+    isDeleting ||
+    (itemCounts?.blogs && itemCounts.blogs > 0) ||
+    (itemCounts?.templates && itemCounts.templates > 0) ? true : false;
+
   return (
     <button
       className={`p-2 rounded-lg transition-colors ${
-        disabled || isDeleting
+        isDisabled
           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
           : 'bg-red-50 text-red-600 hover:bg-red-100'
       }`}
-      disabled={disabled || isDeleting}
+      disabled={isDisabled}
       onClick={handleDelete}
-      title={
-        disabled
-          ? "Cannot delete category with existing blogs"
-          : "Delete category"
-      }
+      title={getTooltipMessage()}
     >
       <Trash2 className="w-4 h-4" />
     </button>

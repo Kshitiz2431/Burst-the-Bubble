@@ -75,6 +75,7 @@ export default function FriendlyForm() {
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [guidelinesAccepted, setGuidelinesAccepted] = useState(false);
   const [buddyName, setBuddyName] = useState("");
   const [buddyCalendlyUrl, setBuddyCalendlyUrl] = useState("");
   const [requestId, setRequestId] = useState("");
@@ -97,15 +98,15 @@ export default function FriendlyForm() {
   // Effect to handle payment after form submission
   useEffect(() => {
     if (shouldInitiatePayment && requestId) {
-      console.log("Initiating payment for requestId:", requestId);
-      handlePayment();
+      console.log("Payment was set to initiate automatically, but we'll show a confirmation screen instead");
+      // We are no longer auto-initiating payment - user must click the Pay Now button
       setShouldInitiatePayment(false);
     }
   }, [shouldInitiatePayment, requestId]);
 
   // Load Calendly widget script
   useEffect(() => {
-    if (formSubmitted && paymentCompleted && buddyCalendlyUrl) {
+    if (formSubmitted && paymentCompleted && guidelinesAccepted && buddyCalendlyUrl) {
       // Clean up any existing scripts to avoid duplicates
       const existingScript = document.querySelector('script[src="https://assets.calendly.com/assets/external/widget.js"]');
       if (existingScript) {
@@ -145,7 +146,7 @@ export default function FriendlyForm() {
         }
       };
     }
-  }, [formSubmitted, paymentCompleted, buddyCalendlyUrl, form]);
+  }, [formSubmitted, paymentCompleted, guidelinesAccepted, buddyCalendlyUrl, form]);
 
   // Handle payment with Razorpay
   const handlePayment = async () => {
@@ -207,13 +208,34 @@ export default function FriendlyForm() {
             }
             
             const verifyData = await verifyResponse.json();
-            toast.success("Payment successful! You can now schedule your session.");
-            setPaymentCompleted(true);
+            console.log("Payment verification successful:", verifyData);
+            console.log("Current state before update:", {
+              formSubmitted,
+              paymentCompleted,
+              guidelinesAccepted,
+              requestId,
+              buddyName
+            });
             
-            // Update buddy URL if it's in the response
-            if (verifyData.calendlyUrl) {
-              setBuddyCalendlyUrl(verifyData.calendlyUrl);
-            }
+            // Wrap the state updates in a setTimeout to ensure they are properly batched
+            // and the component has a chance to re-render
+            setTimeout(() => {
+              toast.success("Payment successful! Please review our guidelines before scheduling.");
+              setPaymentCompleted(true);
+              
+              // Update buddy URL if it's in the response
+              if (verifyData.calendlyUrl) {
+                setBuddyCalendlyUrl(verifyData.calendlyUrl);
+              }
+              
+              console.log("State after payment completion:", {
+                formSubmitted,
+                paymentCompleted: true,
+                guidelinesAccepted,
+                requestId,
+                buddyName
+              });
+            }, 100);
             
           } catch (error) {
             console.error("Payment verification error:", error);
@@ -289,11 +311,27 @@ export default function FriendlyForm() {
           calendlyUrl: calendlyUrl
         });
         
+        console.log("Current state before updates:", {
+          formSubmitted,
+          paymentCompleted,
+          guidelinesAccepted,
+          requestId,
+          buddyName
+        });
+        
         setBuddyName(result.buddyName);
         setBuddyCalendlyUrl(calendlyUrl);
         setRequestId(result.requestId);
         setFormSubmitted(true);
         setShouldInitiatePayment(true);
+        
+        console.log("State after form submission:", {
+          formSubmitted: true,
+          paymentCompleted,
+          guidelinesAccepted,
+          requestId: result.requestId,
+          buddyName: result.buddyName
+        });
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -303,106 +341,199 @@ export default function FriendlyForm() {
     }
   };
 
-  // Handle displaying the form, payment screen, or Calendly
-  if (formSubmitted) {
-    // If payment completed, show Calendly
-    if (paymentCompleted) {
-      return (
-        <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-[#e27396] mb-2">Schedule with {buddyName}</h2>
-            <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
-              Please select a convenient time slot from {buddyName}'s calendar. You'll receive a confirmation email once your appointment is scheduled.
-            </p>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden mb-8">
-            <div 
-              ref={calendlyContainerRef} 
-              id="calendly-inline-widget"
-              className="w-full"
-              style={{ height: "calc(100vh - 300px)", minHeight: "800px", maxHeight: "1000px" }}
-            ></div>
-          </div>
-          
-          <div className="text-center">
-            <Button 
-              onClick={() => {
-                setFormSubmitted(false);
-                setPaymentCompleted(false);
-                form.reset();
-              }}
-              className="px-6 py-2 bg-white hover:bg-gray-50 text-[#e27396] border border-[#e27396] hover:border-[#d45c82] transition-colors duration-200"
-              variant="outline"
-            >
-              Go Back to Form
-            </Button>
-          </div>
-        </div>
-      );
-    }
-    
-    // Show payment screen
+  // Add this after the other useEffect hooks
+  useEffect(() => {
+    console.log("State changed:", {
+      formSubmitted,
+      paymentCompleted,
+      guidelinesAccepted,
+      requestId,
+      buddyName,
+      buddyCalendlyUrl
+    });
+  }, [formSubmitted, paymentCompleted, guidelinesAccepted, requestId, buddyName, buddyCalendlyUrl]);
+
+  // Handle displaying the form, payment screen, guidelines, or Calendly
+  if (formSubmitted && !paymentCompleted) {
+    // Show payment confirmation screen
     return (
       <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200">
-        <Script 
-          src="https://checkout.razorpay.com/v1/checkout.js"
-          strategy="lazyOnload"
-        />
-        
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-[#e27396] mb-2">Complete Your Payment</h2>
           <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
-            You're almost there! Complete the payment to schedule your session with {buddyName}.
+            Your request has been submitted! {buddyName} will be your buddy for this session.
+            Please complete the payment to proceed with scheduling.
+          </p>
+          
+          <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8">
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-gray-700">Buddy Session ({form.getValues("mode")})</span>
+                <span className="font-medium">₹499</span>
+              </div>
+              <div className="flex justify-between border-t pt-2 font-bold">
+                <span>Total</span>
+                <span>₹499</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-col space-y-4">
+            <Button 
+              onClick={handlePayment}
+              disabled={isPaymentProcessing}
+              className="w-full bg-[#e27396] hover:bg-[#d45c82] text-white py-3 text-md font-medium rounded-xl"
+            >
+              {isPaymentProcessing ? "Processing..." : "Pay Now"}
+            </Button>
+            
+            <Button 
+              onClick={() => {
+                setFormSubmitted(false);
+                setRequestId("");
+              }}
+              disabled={isPaymentProcessing}
+              className="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 py-3 text-md font-medium rounded-xl"
+              variant="outline"
+            >
+              Go Back
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (formSubmitted && paymentCompleted && !guidelinesAccepted) {
+    // Show guidelines screen
+    return (
+      <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-[#e27396] mb-2">Guidelines for Your Session</h2>
+          <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
+            Please review these important guidelines before scheduling your session with {buddyName}.
           </p>
         </div>
         
         <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Session Details</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Session Type:</span>
-              <span className="font-medium">
-                {form.getValues("mode") === "CHAT" ? "💬 Chat Session" : "📞 Call Session"}
-              </span>
+          <div className="space-y-6">
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">1</div>
+              <div>
+                <h3 className="font-medium text-gray-800">Respect</h3>
+                <p className="text-gray-600">We maintain a respectful environment where all perspectives are valued. Offensive language or personal attacks will not be tolerated.</p>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Duration:</span>
-              <span className="font-medium">{form.getValues("duration")} minutes</span>
+            
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">2</div>
+              <div>
+                <h3 className="font-medium text-gray-800">Confidentiality</h3>
+                <p className="text-gray-600">Your conversations remain confidential. We may use anonymized data for improving our services.</p>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Buddy:</span>
-              <span className="font-medium">{buddyName}</span>
+            
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">3</div>
+              <div>
+                <h3 className="font-medium text-gray-800">Not Therapy</h3>
+                <p className="text-gray-600">Our service provides a friendly conversation, not professional therapy or counseling.</p>
+              </div>
             </div>
-            <div className="border-t border-gray-200 my-2 pt-2"></div>
-            <div className="flex justify-between">
-              <span className="text-gray-800 font-medium">Total Amount:</span>
-              <span className="text-[#e27396] font-bold">
-                ₹{form.getValues("mode") === "CHAT" 
-                  ? (form.getValues("duration") === "30" ? "299" : "499") 
-                  : (form.getValues("duration") === "30" ? "399" : "599")}
-              </span>
+            
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">4</div>
+              <div>
+                <h3 className="font-medium text-gray-800">Crisis Support</h3>
+                <p className="text-gray-600">If you're experiencing a crisis, please contact emergency services or a mental health helpline.</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">5</div>
+              <div>
+                <h3 className="font-medium text-gray-800">Session Focus</h3>
+                <p className="text-gray-600">Sessions focus on having constructive conversations across different perspectives.</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">6</div>
+              <div>
+                <h3 className="font-medium text-gray-800">Cancellation Policy</h3>
+                <p className="text-gray-600">Please provide at least 6 hours notice for cancellations or rescheduling.</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">7</div>
+              <div>
+                <h3 className="font-medium text-gray-800">Punctuality</h3>
+                <p className="text-gray-600">Please be on time for your scheduled session. Your buddy will wait for 10 minutes.</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">8</div>
+              <div>
+                <h3 className="font-medium text-gray-800">Feedback</h3>
+                <p className="text-gray-600">We value your feedback to improve our service. You'll receive a feedback form after your session.</p>
+              </div>
             </div>
           </div>
         </div>
         
         <div className="flex flex-col space-y-4">
           <Button 
-            onClick={handlePayment}
+            onClick={() => setGuidelinesAccepted(true)}
             className="w-full bg-[#e27396] hover:bg-[#d45c82] text-white py-3 text-md font-medium rounded-xl"
-            disabled={isPaymentProcessing || !requestId}
           >
-            {isPaymentProcessing ? "Processing..." : "Pay Now"}
+            I Accept These Guidelines
           </Button>
           
           <Button 
             onClick={() => {
-              setFormSubmitted(false);
+              setPaymentCompleted(false);
             }}
             className="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 py-3 text-md font-medium rounded-xl"
             variant="outline"
           >
             Go Back
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (formSubmitted && paymentCompleted && guidelinesAccepted) {
+    // Show Calendly screen
+    return (
+      <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-[#e27396] mb-2">Schedule with {buddyName}</h2>
+          <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
+            Please select a convenient time slot from {buddyName}'s calendar. You'll receive a confirmation email once your appointment is scheduled.
+          </p>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-gray-200 shadow-md overflow-hidden mb-8">
+          <div 
+            ref={calendlyContainerRef} 
+            id="calendly-inline-widget"
+            className="w-full"
+            style={{ height: "calc(100vh - 300px)", minHeight: "800px", maxHeight: "1000px" }}
+          ></div>
+        </div>
+        
+        <div className="text-center">
+          <Button 
+            onClick={() => {
+              setGuidelinesAccepted(false);
+            }}
+            className="px-6 py-2 bg-white hover:bg-gray-50 text-[#e27396] border border-[#e27396] hover:border-[#d45c82] transition-colors duration-200"
+            variant="outline"
+          >
+            Back to Guidelines
           </Button>
         </div>
       </div>

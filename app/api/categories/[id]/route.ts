@@ -10,7 +10,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session || !session.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -19,13 +19,14 @@ export async function DELETE(
 
     const { id } = params;
 
-    // Check if category has any blogs
+    // Check if category has any associated blogs or templates
     const category = await prisma.category.findUnique({
       where: { id },
       include: {
         _count: {
           select: {
             blogs: true,
+            templates: true
           },
         },
       },
@@ -38,9 +39,17 @@ export async function DELETE(
       );
     }
 
-    if (category._count.blogs > 0) {
+    // Check if there are associated blogs or templates
+    if (category._count.blogs > 0 || category._count.templates > 0) {
       return NextResponse.json(
-        { error: "Cannot delete category with existing blogs" },
+        {
+          error: "Cannot delete category with associated content",
+          message: "This category has associated blogs or templates. Remove those first.",
+          count: {
+            blogs: category._count.blogs,
+            templates: category._count.templates
+          }
+        },
         { status: 400 }
       );
     }
@@ -51,10 +60,13 @@ export async function DELETE(
       data: { isActive: false },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json(
+      { success: true, message: "Category deleted successfully" },
+      { status: 200 }
+    );
 
   } catch (error) {
-    console.error("Category deletion error:", error);
+    console.error("Error deleting category:", error);
     return NextResponse.json(
       { error: "Failed to delete category" },
       { status: 500 }

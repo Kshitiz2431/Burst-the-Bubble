@@ -132,7 +132,7 @@ const Footer = () => {
                 <Twitter className="w-5 h-5" />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/burst_thebubble/?hl=en"
                 className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#e27396] transition-colors"
                 aria-label="Instagram"
               >
