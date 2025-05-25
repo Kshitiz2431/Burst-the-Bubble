@@ -130,7 +130,7 @@ const FeatureCards = () => {
                   </p>
 
                   {/* Learn More Link */}
-                  <Link
+                  {/* <Link
                     href={feature.link}
                     className="inline-flex items-center text-[#e27396] hover:text-[#d45c82] transition-colors font-medium mt-4 
                              bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg shadow-sm hover:shadow-md"
@@ -149,7 +149,7 @@ const FeatureCards = () => {
                         d="M9 5l7 7-7 7"
                       />
                     </svg>
-                  </Link>
+                  </Link> */}
                 </div>
               </motion.div>
             ))}

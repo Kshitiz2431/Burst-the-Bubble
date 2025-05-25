@@ -51,32 +51,32 @@ export default function ContactPage() {
                   infoburstthebubble@gmail.com
                 </span>
               </div>
-              <div className="flex items-center justify-center gap-4">
+              {/* <div className="flex items-center justify-center gap-4">
                 <div className="p-3 bg-[#e27396] rounded-full text-white">
                   <Phone className="w-6 h-6" />
                 </div>
                 <span className="text-lg text-gray-800">1-800-BUBBLE</span>
-              </div>
+              </div> */}
             </div>
             <div className="mt-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
-                Follow Us
+                Follow Us On Instagram
               </h3>
               <div className="flex items-center justify-center gap-4">
                 {[
-                  {
-                    icon: <Facebook className="w-5 h-5" />,
-                    label: "Facebook",
-                  },
-                  { icon: <Twitter className="w-5 h-5" />, label: "Twitter" },
+                  // {
+                  //   icon: <Facebook className="w-5 h-5" />,
+                  //   label: "Facebook",
+                  // },
+                  // { icon: <Twitter className="w-5 h-5" />, label: "Twitter" },
                   {
                     icon: <Instagram className="w-5 h-5" />,
                     label: "Instagram",
                   },
-                  {
-                    icon: <Linkedin className="w-5 h-5" />,
-                    label: "LinkedIn",
-                  },
+                  // {
+                  //   icon: <Linkedin className="w-5 h-5" />,
+                  //   label: "LinkedIn",
+                  // },
                 ].map((social) => (
                   <a
                     key={social.label}

@@ -77,7 +77,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/faq"
+                  href="/contact-us"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   FAQ
@@ -102,6 +102,12 @@ const Footer = () => {
                 <Mail className="w-5 h-5" />
                 <span>infoburstthebubble@gmail.com</span>
               </li>
+              <li>
+              <div className="mt-8 text-sm text-gray-400 pt-10">
+              Subscribe to our newsletter for weekly relationship tips and
+              updates.
+            </div>
+              </li>
               {/* <li className="flex items-center gap-2 text-gray-300">
                 <Phone className="w-5 h-5" />
                 <span>1-800-BUBBLE</span>
@@ -115,9 +121,19 @@ const Footer = () => {
 
           {/* Social Media */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
-            <div className="flex space-x-4">
-              <a
+            <div className="flex flex-col items-center">
+
+              <h3 className="text-lg font-semibold mb-4">Follow Us on Instagram</h3>
+                <a
+                  href="https://www.instagram.com/burst_thebubble/?hl=en"
+                  className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#e27396] transition-colors"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-5 h-5" />
+                </a>
+            </div>
+            {/* <div className="flex space-x-4"> */}
+              {/* <a
                 href="#"
                 className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#e27396] transition-colors"
                 aria-label="Facebook"
@@ -130,26 +146,16 @@ const Footer = () => {
                 aria-label="Twitter"
               >
                 <Twitter className="w-5 h-5" />
-              </a>
-              <a
-                href="https://www.instagram.com/burst_thebubble/?hl=en"
-                className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#e27396] transition-colors"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a
+              </a> */}
+              {/* <a
                 href="#"
                 className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#e27396] transition-colors"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="w-5 h-5" />
-              </a>
-            </div>
-            <div className="mt-8 text-sm text-gray-400">
-              Subscribe to our newsletter for weekly relationship tips and
-              updates.
-            </div>
+              </a> */}
+            {/* </div> */}
+           
           </div>
         </div>
 

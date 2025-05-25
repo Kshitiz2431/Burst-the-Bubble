@@ -19,7 +19,6 @@ export default function PrivacyLayout({
       <main className="flex-grow">
         {children}
       </main>
-      <Footer />
     </div>
   );
 } 

@@ -3,7 +3,7 @@ import { LockIcon, ShieldIcon } from "lucide-react";
 export default function PrivacyPolicyPage() {
   return (
     <>
-      <div className="bg-gradient-to-r from-[#e27396] to-[#d45c82] text-white py-16">
+      <div className="bg-gradient-to-r from-[#e27396] to-[#d45c82] text-white py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center space-x-3 mb-6">
             <ShieldIcon className="w-8 h-8" />

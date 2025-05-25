@@ -73,34 +73,34 @@ const freeBenefits = [
 
 const premiumBenefits = [
   {
-    title: "Exclusive Content",
-    description: "Premium in-depth relationship guides and case studies",
+    title: "Exclusive Articles",
+    description: "In-depth content not available on the website, tackling advanced or nuanced relationship topics.",
     icon: <Star className="w-6 h-6 text-[#e27396]" />,
   },
   {
-    title: "Premium Resources",
-    description: "Download e-books and interactive relationship workbooks",
-    icon: <Gift className="w-6 h-6 text-[#e27396]" />,
-  },
-  {
-    title: "Early Access",
-    description: "Be the first to access new features and premium content",
-    icon: <Clock className="w-6 h-6 text-[#e27396]" />,
-  },
-  {
-    title: "Private Community",
-    description: "Join our exclusive community of premium subscribers",
-    icon: <Lock className="w-6 h-6 text-[#e27396]" />,
-  },
-  {
-    title: "Advanced Templates",
-    description: "Access to our full library of premium templates",
+    title: "Access to Premium Love Letters",
+    description: "Personalized or curated love letters designed to inspire deeper emotional connections.",
     icon: <BookOpen className="w-6 h-6 text-[#e27396]" />,
   },
   {
-    title: "Priority Support",
-    description: "Get your relationship questions answered first",
-    icon: <Shield className="w-6 h-6 text-[#e27396]" />,
+    title: "Relationship Toolkits",
+    description: "Downloadable resources such as comprehensive guides, worksheets, or checklists for specific relationship challenges.",
+    icon: <Gift className="w-6 h-6 text-[#e27396]" />,
+  },
+  {
+    title: "Monthly Q&A",
+    description: "A subscriber-only Q&A session with relationship experts or contributors.",
+    icon: <Lock className="w-6 h-6 text-[#e27396]" />,
+  },
+  {
+    title: "Early Access",
+    description: "Receive new resources and announcements before they go live to the general audience.",
+    icon: <Clock className="w-6 h-6 text-[#e27396]" />,
+  },
+  {
+    title: "Custom Love Notes",
+    description: "Subscribers can request personalized love notes or quotes for special occasions.",
+    icon: <Mail className="w-6 h-6 text-[#e27396]" />,
   }
 ];
 
