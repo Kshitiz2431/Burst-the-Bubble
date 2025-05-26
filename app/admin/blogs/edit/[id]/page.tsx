@@ -225,47 +225,50 @@ const modules = {
         const input = document.createElement('input');
         input.setAttribute('type', 'file');
         input.setAttribute('accept', 'image/*');
-        input.click();
-
+        
+        // Handle file selection
         input.onchange = async () => {
           const file = input.files?.[0];
           if (!file) return;
-
+          
           const quill = (this as any).quill;
           const range = quill.getSelection(true);
-
-          try {
-            // Show loading toast
-            toast.loading('Preparing image editor...');
-            
-            // Create and show modal with ImageEditor
-            const editorContainer = document.createElement('div');
-            editorContainer.style.position = 'fixed';
-            editorContainer.style.top = '0';
-            editorContainer.style.left = '0';
-            editorContainer.style.width = '100%';
-            editorContainer.style.zIndex = '9999';
-            editorContainer.style.height = '100%';
-            document.body.appendChild(editorContainer);
-            
-            const root = ReactDOM.createRoot(editorContainer);
-            
-            // Dismiss loading toast
-            toast.dismiss();
-            
-            root.render(
+          
+          // Create editor container with explicit z-index that overrides toast
+          const editorContainer = document.createElement('div');
+          editorContainer.className = 'image-editor-modal';
+          editorContainer.style.position = 'fixed';
+          editorContainer.style.top = '0';
+          editorContainer.style.left = '0';
+          editorContainer.style.width = '100%';
+          editorContainer.style.height = '100%';
+          editorContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+          editorContainer.style.zIndex = '100000'; // Very high z-index to override all other elements
+          editorContainer.style.display = 'flex';
+          editorContainer.style.alignItems = 'center';
+          editorContainer.style.justifyContent = 'center';
+          
+          // Add the container to the document
+          document.body.appendChild(editorContainer);
+          
+          // Create React root in the container
+          const root = ReactDOM.createRoot(editorContainer);
+          
+          // Render the image editor
+          root.render(
+            <div className="relative w-full max-w-4xl mx-auto">
               <ImageEditor
                 image={file}
                 aspect={16/9}
                 onSave={async (croppedImage) => {
                   try {
+                    // Show upload toast (appears below the modal)
+                    toast.loading('Uploading image...');
+                    
                     // Ensure croppedImage is a File object
                     if (!(croppedImage instanceof File)) {
                       throw new Error("Expected a File object from the image editor");
                     }
-                    
-                    // Show upload toast
-                    toast.loading('Uploading image...');
                     
                     // Upload the image using our helper
                     const { apiUrl, key } = await uploadImage(croppedImage);
@@ -287,26 +290,36 @@ const modules = {
                       }
                     }
                     
+                    // Dismiss any loading toasts and show success
+                    toast.dismiss();
                     toast.success('Image uploaded successfully!');
+                    
+                    // Clean up the editor
+                    root.unmount();
+                    document.body.removeChild(editorContainer);
                   } catch (error) {
-                    console.error('Error:', error);
+                    console.error('Error uploading image:', error);
+                    // Dismiss any loading toasts and show error
+                    toast.dismiss();
                     toast.error(error instanceof Error ? error.message : "Failed to upload image");
-                  } finally {
+                    
+                    // Clean up the editor
                     root.unmount();
                     document.body.removeChild(editorContainer);
                   }
                 }}
                 onCancel={() => {
+                  // Clean up the editor
                   root.unmount();
                   document.body.removeChild(editorContainer);
                 }}
               />
-            );
-          } catch (error) {
-            console.error('Error initializing image editor:', error);
-            toast.error('Failed to initialize image editor');
-          }
+            </div>
+          );
         };
+        
+        // Trigger file selection
+        input.click();
       }
     }
   },

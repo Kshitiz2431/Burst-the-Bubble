@@ -260,31 +260,30 @@ export const uploadImage = async (file: File): Promise<{ apiUrl: string, key: st
   try {
     // Generate a unique filename
     const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, '-').toLowerCase()}`;
-    const key = `blog-content-images/${fileName}`;
     
     // Get presigned URL for upload
-    const response = await fetch(`/api/upload/image?key=${encodeURIComponent(key)}&contentType=${encodeURIComponent(file.type)}`);
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: fileName,
+        contentType: file.type,
+        type: "content",
+      }),
+    });
     
     if (!response.ok) {
       const errorData = await response.text();
       throw new Error(`Failed to get upload URL (${response.status}): ${errorData}`);
     }
     
-    const { url, fields } = await response.json();
-    
-    // Create form data for upload
-    const formData = new FormData();
-    Object.entries(fields).forEach(([fieldKey, value]) => {
-      formData.append(fieldKey, value as string);
-    });
-    
-    // Add the file
-    formData.append('file', file);
+    const { signedUrl, key } = await response.json();
     
     // Upload to S3
-    const uploadResponse = await fetch(url, {
-      method: 'POST',
-      body: formData,
+    const uploadResponse = await fetch(signedUrl, {
+      method: "PUT",
+      body: file,
+      headers: { "Content-Type": file.type },
     });
     
     if (!uploadResponse.ok) {
