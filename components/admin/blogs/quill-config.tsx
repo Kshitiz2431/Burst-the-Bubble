@@ -3,6 +3,7 @@
 import ReactDOM from 'react-dom/client';
 import { ImageEditor } from "./new-image-editor";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from 'uuid';
 
 export const modules = {
   toolbar: {
@@ -34,76 +35,78 @@ export const modules = {
           const quill = (this as any).quill;
           const range = quill.getSelection(true);
 
-          // Create and show modal with ImageEditor
-          const editorContainer = document.createElement('div');
-          editorContainer.style.position = 'fixed';
-          editorContainer.style.top = '0';
-          editorContainer.style.left = '0';
-          editorContainer.style.width = '100%';
-          editorContainer.style.height = '100%';
-          editorContainer.style.zIndex = '9999';
-          document.body.appendChild(editorContainer);
-
-          const root = ReactDOM.createRoot(editorContainer);
-          
-          root.render(
-            <ImageEditor
-              image={file}
-              aspect={16/9}
-              onSave={async (croppedImage) => {
-                try {
-                  // Get upload URL
-                  const response = await fetch("/api/upload", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      filename: croppedImage.name,
-                      contentType: croppedImage.type,
-                      type: "content",
-                    }),
-                  });
-
-                  if (!response.ok) throw new Error("Failed to get upload URL");
-                  const { signedUrl, key } = await response.json();
-
-                  // Upload to S3
-                  await fetch(signedUrl, {
-                    method: "PUT",
-                    body: croppedImage,
-                    headers: { "Content-Type": croppedImage.type },
-                  });
-
-                  // Get URL
-                  const imageUrlResponse = await fetch(`/api/image/${encodeURIComponent(key)}`);
-                  const { url: displayUrl } = await imageUrlResponse.json();
-
-                  // Basic Quill insertion
-                  quill.insertEmbed(range.index, 'image', displayUrl);
-                  quill.setSelection(range.index + 1);
-
-                  // Add data-key using basic DOM
-                  const imageElements = quill.root.getElementsByTagName('img') as HTMLCollectionOf<HTMLImageElement>;
-                  for (let i = 0; i < imageElements.length; i++) {
-                    if (imageElements[i].src === displayUrl) {
-                      imageElements[i].setAttribute('data-key', key);
-                      break;
+          try {
+            // Show loading toast
+            toast.loading('Preparing image editor...');
+            
+            // Create and show modal with ImageEditor
+            const editorContainer = document.createElement('div');
+            editorContainer.style.position = 'fixed';
+            editorContainer.style.top = '0';
+            editorContainer.style.left = '0';
+            editorContainer.style.width = '100%';
+            editorContainer.style.zIndex = '9999';
+            editorContainer.style.height = '100%';
+            document.body.appendChild(editorContainer);
+            
+            const root = ReactDOM.createRoot(editorContainer);
+            
+            // Dismiss loading toast
+            toast.dismiss();
+            
+            root.render(
+              <ImageEditor
+                image={file}
+                aspect={16/9}
+                onSave={async (croppedImage) => {
+                  try {
+                    // Ensure croppedImage is a File object
+                    if (!(croppedImage instanceof File)) {
+                      throw new Error("Expected a File object from the image editor");
                     }
+                    
+                    // Show upload toast
+                    toast.loading('Uploading image...');
+                    
+                    // Upload the image using our helper
+                    const { apiUrl, key } = await uploadImage(croppedImage);
+                    
+                    // Get the signed URL for display
+                    const signedUrlResponse = await getImageUrl(encodeURIComponent(key));
+                    
+                    // Insert the image into the editor
+                    quill.insertEmbed(range.index, 'image', signedUrlResponse);
+                    quill.setSelection(range.index + 1);
+                    
+                    // Add data-key using basic DOM
+                    const imageElements = quill.root.getElementsByTagName('img') as HTMLCollectionOf<HTMLImageElement>;
+                    for (let i = 0; i < imageElements.length; i++) {
+                      if (imageElements[i].src === signedUrlResponse) {
+                        imageElements[i].setAttribute('data-key', key);
+                        imageElements[i].setAttribute('crossorigin', 'anonymous');
+                        break;
+                      }
+                    }
+                    
+                    toast.success('Image uploaded successfully!');
+                  } catch (error) {
+                    console.error('Error:', error);
+                    toast.error(error instanceof Error ? error.message : "Failed to upload image");
+                  } finally {
+                    root.unmount();
+                    document.body.removeChild(editorContainer);
                   }
-
-                } catch (error) {
-                  console.error('Error:', error);
-                  toast.error("Failed to upload image");
-                } finally {
+                }}
+                onCancel={() => {
                   root.unmount();
                   document.body.removeChild(editorContainer);
-                }
-              }}
-              onCancel={() => {
-                root.unmount();
-                document.body.removeChild(editorContainer);
-              }}
-            />
-          );
+                }}
+              />
+            );
+          } catch (error) {
+            console.error('Error initializing image editor:', error);
+            toast.error('Failed to initialize image editor');
+          }
         };
       }
     }
@@ -133,10 +136,25 @@ export const formats = [
 
 // Helper function to get image URL
 export const getImageUrl = async (key: string): Promise<string> => {
+  if (!key) {
+    throw new Error('Image key is required');
+  }
+  
   try {
-    const response = await fetch(`/api/image/${encodeURIComponent(key)}`);
-    if (!response.ok) throw new Error('Failed to get image URL');
+    // Key should already be encoded by the caller
+    const response = await fetch(`/api/image/${key}`);
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`Failed to get image URL (${response.status}): ${errorData}`);
+    }
+    
     const data = await response.json();
+    
+    if (!data.url) {
+      throw new Error('Invalid response from image API: missing URL');
+    }
+    
     return data.url;
   } catch (error) {
     console.error('Error getting image URL:', error);
@@ -145,15 +163,59 @@ export const getImageUrl = async (key: string): Promise<string> => {
 };
 
 export const processContentBeforeSave = (content: string): string => {
+  if (!content) return '';
+  
   const div = document.createElement('div');
   div.innerHTML = content;
 
   const images = div.getElementsByTagName('img');
   Array.from(images).forEach((img: HTMLImageElement) => {
+    // Prioritize data-key if it exists
     const key = img.getAttribute('data-key');
     if (key) {
-      img.removeAttribute('src');  // Remove the signed URL
-      img.setAttribute('data-key', key);  // Keep the key
+      // Create a clean image element with only the necessary attributes
+      const newImg = document.createElement('img');
+      newImg.setAttribute('data-key', key);
+      
+      // Keep alt and title attributes if present
+      if (img.hasAttribute('alt')) {
+        newImg.setAttribute('alt', img.getAttribute('alt') || '');
+      }
+      
+      if (img.hasAttribute('title')) {
+        newImg.setAttribute('title', img.getAttribute('title') || '');
+      }
+      
+      // Replace the old image with the clean one
+      img.parentNode?.replaceChild(newImg, img);
+    } else {
+      // If there's no data-key, try to extract one from the src
+      const src = img.getAttribute('src');
+      if (src && src.includes('/api/image/')) {
+        try {
+          // Extract the key from the API URL
+          const key = src.replace('/api/image/', '');
+          const decodedKey = decodeURIComponent(key);
+          
+          // Create a clean image with data-key
+          const newImg = document.createElement('img');
+          newImg.setAttribute('data-key', decodedKey);
+          
+          // Keep alt and title attributes
+          if (img.hasAttribute('alt')) {
+            newImg.setAttribute('alt', img.getAttribute('alt') || '');
+          }
+          
+          if (img.hasAttribute('title')) {
+            newImg.setAttribute('title', img.getAttribute('title') || '');
+          }
+          
+          // Replace the old image
+          img.parentNode?.replaceChild(newImg, img);
+        } catch (error) {
+          console.error('Error processing image for save:', error);
+        }
+      }
     }
   });
 
@@ -161,6 +223,8 @@ export const processContentBeforeSave = (content: string): string => {
 };
 
 export const processContentAfterLoad = async (content: string): Promise<string> => {
+  if (!content) return '';
+
   const div = document.createElement('div');
   div.innerHTML = content;
 
@@ -169,14 +233,69 @@ export const processContentAfterLoad = async (content: string): Promise<string> 
     const key = img.getAttribute('data-key');
     if (key) {
       try {
-        const signedUrl = await getImageUrl(key);
+        // Make sure to encode the key properly
+        const encodedKey = encodeURIComponent(key);
+        const signedUrl = await getImageUrl(encodedKey);
         img.setAttribute('src', signedUrl);
+        
+        // Add crossorigin attribute for CORS support
+        img.setAttribute('crossorigin', 'anonymous');
       } catch (error) {
         console.error('Error loading image:', error);
+        // Set a placeholder image
         img.setAttribute('src', '/placeholder-image.jpg');
       }
     }
   }));
 
   return div.innerHTML;
+};
+
+// Helper function to upload an image and get API URL
+export const uploadImage = async (file: File): Promise<{ apiUrl: string, key: string }> => {
+  if (!file) {
+    throw new Error('File is required');
+  }
+  
+  try {
+    // Generate a unique filename
+    const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, '-').toLowerCase()}`;
+    const key = `blog-content-images/${fileName}`;
+    
+    // Get presigned URL for upload
+    const response = await fetch(`/api/upload/image?key=${encodeURIComponent(key)}&contentType=${encodeURIComponent(file.type)}`);
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`Failed to get upload URL (${response.status}): ${errorData}`);
+    }
+    
+    const { url, fields } = await response.json();
+    
+    // Create form data for upload
+    const formData = new FormData();
+    Object.entries(fields).forEach(([fieldKey, value]) => {
+      formData.append(fieldKey, value as string);
+    });
+    
+    // Add the file
+    formData.append('file', file);
+    
+    // Upload to S3
+    const uploadResponse = await fetch(url, {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!uploadResponse.ok) {
+      throw new Error(`Upload failed: ${uploadResponse.status}`);
+    }
+    
+    // Return the API URL for the image
+    const apiUrl = `/api/image/${encodeURIComponent(key)}`;
+    return { apiUrl, key };
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
 };

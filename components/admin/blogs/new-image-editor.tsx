@@ -39,7 +39,7 @@ function centerAspectCrop(
 
 interface ImageEditorProps {
   image: File | string;
-  onSave: (croppedImage: File | string) => void;
+  onSave: (croppedImage: File) => void;
   onCancel: () => void;
   aspect?: number | null;
 }

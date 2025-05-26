@@ -14,6 +14,7 @@ import { ImageUpload } from "@/components/admin/blogs/image-upload";
 import { Image } from "@/components/Image";
 import "react-quill/dist/quill.snow.css";
 import { Quill } from "react-quill";
+import { processContentAfterLoad, uploadImage, getImageUrl } from "@/components/admin/blogs/quill-config";
 
 // Import Quill dynamically to avoid SSR issues
 const QuillEditor = dynamic(() => import("react-quill"), {
@@ -30,25 +31,147 @@ const QuillEditor = dynamic(() => import("react-quill"), {
 const ImageBlot = Quill.import('formats/image');
 class CustomImageBlot extends ImageBlot {
   static create(value: string) {
-    const node = super.create(value);
-    if (value.startsWith('/api/image/')) {
-      // Create a container div
-      const container = document.createElement('div');
-      container.className = 'quill-image-container';
+    console.log('CustomImageBlot.create called with value:', value);
+    
+    const node = super.create(value) as HTMLImageElement;
+    
+    // Create a loading placeholder image
+    const placeholderDataUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNFNUU3RUIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiM5Q0EzQUYiPkxvYWRpbmcgaW1hZ2UuLi48L3RleHQ+PC9zdmc+';
+    
+    // Set crossOrigin for CORS support
+    node.setAttribute('crossorigin', 'anonymous');
+    
+    // Set placeholder immediately to ensure something displays
+    node.src = placeholderDataUrl;
+    
+    // Add error handling to preserve placeholder on error
+    node.onerror = () => {
+      console.error('Error loading image:', value);
+      node.src = placeholderDataUrl;
       
-      // Render our QuillImage component into it
-      const root = ReactDOM.createRoot(container);
-      root.render(<QuillImage src={value} className="max-w-full h-auto" />);
+      // If this was a signed URL that failed, try the API URL instead
+      if (value.includes('X-Amz-Algorithm') && node.hasAttribute('data-api-url')) {
+        const apiUrl = node.getAttribute('data-api-url');
+        console.log('Signed URL failed, trying API URL instead:', apiUrl);
+        
+        // Don't try again if we're already using the API URL
+        if (apiUrl !== value) {
+          node.src = apiUrl || placeholderDataUrl;
+        }
+      }
+    };
+    
+    // Check if the value is a URL
+    if (typeof value === 'string') {
+      console.log('CustomImageBlot: Setting up image with URL:', value);
       
-      return container;
+      // Check if it's a direct S3 URL with signature
+      if (value.includes('X-Amz-Algorithm')) {
+        console.log('Using direct S3 URL');
+        node.src = value;
+        
+        // Extract the key from the URL if possible
+        if (value.includes('.amazonaws.com/')) {
+          const urlParts = value.split('.amazonaws.com/');
+          const keyWithParams = urlParts[1];
+          const key = keyWithParams.split('?')[0];
+          console.log('Extracted key from S3 URL:', key);
+          
+          // Store the API URL for future use
+          const apiUrl = `/api/image/${key}`;
+          node.setAttribute('data-api-url', apiUrl);
+          node.setAttribute('data-key', key);
+        }
+      } 
+      // Extract filename if it's a full path
+      else if (value.includes('/blog-content-images/')) {
+        const keyParts = value.split('/');
+        const filename = keyParts[keyParts.length - 1];
+        const apiUrl = `/api/image/${filename}`;
+        console.log('Modified API URL to:', apiUrl);
+        
+        // Store the API URL as a data attribute
+        node.setAttribute('data-api-url', apiUrl);
+        node.setAttribute('data-key', `blog-content-images/${filename}`);
+        
+        // Check if value is already an API URL
+        if (apiUrl.startsWith('/api/image/')) {
+          // Fetch the real image URL
+          fetch(apiUrl)
+            .then(response => {
+              if (!response.ok) {
+                const errorMsg = `Failed to fetch image: ${response.status}`;
+                console.error(errorMsg);
+                throw new Error(errorMsg);
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (data && data.url) {
+                console.log('Setting signed URL:', data.url.substring(0, 50) + '...');
+                node.src = data.url;
+              } else {
+                console.error('Invalid response from image API:', data);
+                node.src = apiUrl; // Fall back to API URL
+              }
+            })
+            .catch(error => {
+              console.error('Error loading image:', error);
+              node.src = apiUrl; // Fall back to API URL on error
+            });
+        }
+      } else if (value.startsWith('/api/image/')) {
+        // Store the API URL as a data attribute
+        node.setAttribute('data-api-url', value);
+        
+        // Extract the key from the API URL
+        const key = value.replace('/api/image/', '');
+        node.setAttribute('data-key', key);
+        
+        // Fetch the real image URL
+        fetch(value)
+          .then(response => {
+            if (!response.ok) {
+              const errorMsg = `Failed to fetch image: ${response.status}`;
+              console.error(errorMsg);
+              throw new Error(errorMsg);
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data && data.url) {
+              console.log('Setting signed URL:', data.url.substring(0, 50) + '...');
+              node.src = data.url;
+            } else {
+              console.error('Invalid response from image API:', data);
+              node.src = value; // Fall back to API URL
+            }
+          })
+          .catch(error => {
+            console.error('Error loading image:', error);
+            node.src = value; // Fall back to API URL on error
+          });
+      } else if (value.startsWith('http')) {
+        // Direct URL, use it as is
+        console.log('Using direct URL:', value);
+        node.src = value;
+      } else {
+        // Assume it's a key and convert to API URL
+        const apiUrl = `/api/image/${value}`;
+        console.log('Converting key to API URL:', apiUrl);
+        node.setAttribute('data-api-url', apiUrl);
+        node.setAttribute('data-key', value);
+        node.src = apiUrl;
+      }
     }
+    
     return node;
   }
 }
-CustomImageBlot.blotName = 'image';
-CustomImageBlot.tagName = 'div'; // Change this from 'img' to 'div'
 
-// Register the custom blot
+// Register the custom blot with proper settings
+CustomImageBlot.blotName = 'image';
+CustomImageBlot.tagName = 'img';
 Quill.register(CustomImageBlot, true);
 
 interface Category {
@@ -98,31 +221,37 @@ const modules = {
       ["clean"],
     ],
     handlers: {
-      image: async function () {
-        return new Promise((resolve) => {
-          const input = document.createElement("input");
-          input.setAttribute("type", "file");
-          input.setAttribute("accept", "image/png, image/jpeg");
-          input.click();
+      image: function() {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
 
-          input.onchange = async () => {
-            const file = input.files?.[0];
-            if (!file) return;
+        input.onchange = async () => {
+          const file = input.files?.[0];
+          if (!file) return;
 
-            const quill = (this as any).quill;
-            const range = quill.getSelection(true);
+          const quill = (this as any).quill;
+          const range = quill.getSelection(true);
 
-            // Create and show modal with NewImageEditor
+          try {
+            // Show loading toast
+            toast.loading('Preparing image editor...');
+            
+            // Create and show modal with ImageEditor
             const editorContainer = document.createElement('div');
             editorContainer.style.position = 'fixed';
             editorContainer.style.top = '0';
             editorContainer.style.left = '0';
             editorContainer.style.width = '100%';
-            editorContainer.style.height = '100%';
             editorContainer.style.zIndex = '9999';
+            editorContainer.style.height = '100%';
             document.body.appendChild(editorContainer);
-
+            
             const root = ReactDOM.createRoot(editorContainer);
+            
+            // Dismiss loading toast
+            toast.dismiss();
             
             root.render(
               <ImageEditor
@@ -130,71 +259,39 @@ const modules = {
                 aspect={16/9}
                 onSave={async (croppedImage) => {
                   try {
-                    // Show loading placeholder
-                    quill.insertEmbed(range.index, "image", "/placeholder-image.jpg");
+                    // Ensure croppedImage is a File object
+                    if (!(croppedImage instanceof File)) {
+                      throw new Error("Expected a File object from the image editor");
+                    }
+                    
+                    // Show upload toast
+                    toast.loading('Uploading image...');
+                    
+                    // Upload the image using our helper
+                    const { apiUrl, key } = await uploadImage(croppedImage);
+                    
+                    // Get the signed URL for display
+                    const signedUrlResponse = await getImageUrl(encodeURIComponent(key));
+                    
+                    // Insert the image into the editor
+                    quill.insertEmbed(range.index, 'image', signedUrlResponse);
                     quill.setSelection(range.index + 1);
-
-                    // Get signed URL and upload
-                    const response = await fetch("/api/upload", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        filename: croppedImage.name,
-                        contentType: croppedImage.type,
-                        type: "content",
-                      }),
-                    });
-
-                    if (!response.ok) {
-                      throw new Error("Failed to get upload URL");
+                    
+                    // Add data-key using basic DOM
+                    const imageElements = quill.root.getElementsByTagName('img') as HTMLCollectionOf<HTMLImageElement>;
+                    for (let i = 0; i < imageElements.length; i++) {
+                      if (imageElements[i].src === signedUrlResponse) {
+                        imageElements[i].setAttribute('data-key', key);
+                        imageElements[i].setAttribute('crossorigin', 'anonymous');
+                        break;
+                      }
                     }
-
-                    const { signedUrl, key } = await response.json();
-
-                    // Upload to S3
-                    const uploadResponse = await fetch(signedUrl, {
-                      method: "PUT",
-                      body: croppedImage,
-                      headers: { "Content-Type": croppedImage.type },
-                    });
-
-                    if (!uploadResponse.ok) {
-                      throw new Error("Failed to upload image");
-                    }
-
-                    // Get a fresh signed URL for display
-                    const displayUrlResponse = await fetch(`/api/image/${key}`);
-                    if (!displayUrlResponse.ok) {
-                      throw new Error("Failed to get display URL");
-                    }
-                    const { url: displayUrl } = await displayUrlResponse.json();
-
-                    // Store both URLs in a data attribute
-                    const [leaf] = quill.getLeaf(range.index);
-                    const index = quill.getIndex(leaf);
-                    quill.deleteText(index, 1);
-
-                    // Insert the image with the display URL
-                    quill.insertEmbed(index, "image", displayUrl);
-
-                    // Add a data attribute with our API URL format for storage
-                    const imageNode = quill.container.querySelector(`img[src="${displayUrl}"]`);
-                    if (imageNode) {
-                      imageNode.dataset.apiUrl = `/api/image/${key}`;
-                    }
-
-                    quill.setSelection(index + 1);
-                    toast.success("Image uploaded successfully");
+                    
+                    toast.success('Image uploaded successfully!');
                   } catch (error) {
-                    toast.error(
-                      error instanceof Error ? error.message : "Failed to upload image"
-                    );
-                    // Remove placeholder if upload failed
-                    const [leaf] = quill.getLeaf(range.index);
-                    const index = quill.getIndex(leaf);
-                    quill.deleteText(index, 1);
+                    console.error('Error:', error);
+                    toast.error(error instanceof Error ? error.message : "Failed to upload image");
                   } finally {
-                    // Clean up
                     root.unmount();
                     document.body.removeChild(editorContainer);
                   }
@@ -205,10 +302,13 @@ const modules = {
                 }}
               />
             );
-          };
-        });
-      },
-    },
+          } catch (error) {
+            console.error('Error initializing image editor:', error);
+            toast.error('Failed to initialize image editor');
+          }
+        };
+      }
+    }
   },
   clipboard: {
     matchVisual: false,
@@ -265,7 +365,8 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
         if (!response.ok) throw new Error("Failed to fetch blog");
         
         const blog = await response.json();
-  
+        console.log('Fetched blog data:', blog);
+
         // Get signed URL for the existing cover image
         let imageUrl = null;
         if (blog.coverImage) {
@@ -279,11 +380,14 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
             console.error('Error getting signed URL:', error);
           }
         }
+
+        // Process the content to handle images properly
+        const processedContent = await processContentAfterLoad(blog.content);
         
         setFormData({
           title: blog.title,
           excerpt: blog.excerpt || "",
-          content: blog.content,
+          content: processedContent,
           categories: blog.categories.map((cat: CategoryFromAPI) => ({
             value: cat.id,
             label: cat.name,
@@ -302,7 +406,7 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
         setIsLoading(false);
       }
     };
-  
+
     if (params.id) {
       fetchBlog();
     }
@@ -422,11 +526,80 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
         const div = document.createElement('div');
         div.innerHTML = content;
         
-        // Replace all image src with their data-api-url
+        // Process all images to ensure they use the API URL format for storage
         div.querySelectorAll('img').forEach(img => {
-          if (img.dataset.apiUrl) {
-            img.src = img.dataset.apiUrl;
+          console.log('Processing image for save:', img.outerHTML);
+          
+          // Get the data-key attribute (preferred storage format)
+          const dataKey = img.getAttribute('data-key');
+          if (dataKey) {
+            console.log('Using data-key for storage:', dataKey);
+            
+            // Extract just the filename if needed
+            let apiUrl;
+            if (dataKey.includes('/')) {
+              const keyParts = dataKey.split('/');
+              const filename = keyParts[keyParts.length - 1];
+              apiUrl = `/api/image/${filename}`;
+            } else {
+              apiUrl = `/api/image/${dataKey}`;
+            }
+            
+            // Store the API URL as src
+            img.setAttribute('src', apiUrl);
           }
+          // If no data-key, check for data-api-url
+          else if (img.hasAttribute('data-api-url')) {
+            const apiUrl = img.getAttribute('data-api-url');
+            console.log('Using data-api-url for image src:', apiUrl);
+            
+            if (apiUrl) {
+              img.setAttribute('src', apiUrl);
+            }
+          }
+          // Handle direct URLs that might need conversion
+          else {
+            const src = img.getAttribute('src');
+            if (src) {
+              if (src.includes('.amazonaws.com/')) {
+                // Extract the key from the S3 URL
+                const urlParts = src.split('.amazonaws.com/');
+                const keyWithParams = urlParts[1];
+                const key = keyWithParams.split('?')[0];
+                console.log('Extracted key from S3 URL:', key);
+                
+                // Convert to API URL format
+                const apiUrl = `/api/image/${key}`;
+                img.setAttribute('src', apiUrl);
+                img.setAttribute('data-key', key);
+              }
+              else if (src.includes('/blog-content-images/')) {
+                // Extract the filename
+                const keyParts = src.split('/');
+                const filename = keyParts[keyParts.length - 1];
+                const apiUrl = `/api/image/${filename}`;
+                console.log('Modified API URL to:', apiUrl);
+                img.setAttribute('src', apiUrl);
+              }
+            }
+          }
+          
+          // Remove any extra attributes we don't want to store
+          img.removeAttribute('crossorigin');
+          
+          // Keep only essential attributes
+          const src = img.getAttribute('src');
+          const alt = img.getAttribute('alt') || '';
+          const dataKeyAttr = img.getAttribute('data-key');
+          
+          // Reset the element to have only what we need
+          const newImg = document.createElement('img');
+          if (src) newImg.setAttribute('src', src);
+          if (alt) newImg.setAttribute('alt', alt);
+          if (dataKeyAttr) newImg.setAttribute('data-key', dataKeyAttr);
+          
+          // Replace the old img with the clean one
+          img.parentNode?.replaceChild(newImg, img);
         });
         
         return div.innerHTML;
