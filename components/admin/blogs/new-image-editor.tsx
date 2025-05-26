@@ -129,10 +129,34 @@ export function ImageEditor({ image, onSave, onCancel, aspect = 16 / 9 }: ImageE
     );
 
     try {
-      const base64 = canvas.toDataURL('image/jpeg');
-      onSave(base64);
+      // Convert canvas to blob instead of base64
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Canvas to Blob conversion failed'));
+            }
+          },
+          'image/jpeg',
+          0.95 // Quality
+        );
+      });
+
+      // Create a File object from the blob
+      const fileName = typeof image === 'string' 
+        ? 'cropped-image.jpg' 
+        : (image instanceof File ? image.name : 'cropped-image.jpg');
+        
+      const croppedFile = new File([blob], fileName, {
+        type: 'image/jpeg',
+        lastModified: new Date().getTime()
+      });
+      
+      onSave(croppedFile);
     } catch (e) {
-      console.error('Error converting canvas to base64', e);
+      console.error('Error cropping image:', e);
     } finally {
       setIsLoading(false);
     }

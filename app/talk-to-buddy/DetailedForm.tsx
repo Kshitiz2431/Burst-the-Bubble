@@ -721,8 +721,8 @@ export default function DetailedForm() {
                     </label>
                     <label className={`flex justify-between items-center p-3 rounded-md cursor-pointer border ${field.value === "60" ? "border-[#e27396] bg-[#e27396]/5" : "border-gray-200 hover:border-[#e27396]/50"}`}>
                       <div className="flex items-center">
-                        <input
-                          type="radio"
+                      <input
+                        type="radio"
                           value="60"
                           checked={field.value === "60"}
                           onChange={() => field.onChange("60")}
