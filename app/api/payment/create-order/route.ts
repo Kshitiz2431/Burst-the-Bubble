@@ -10,6 +10,7 @@ const razorpay = new Razorpay({
 });
 
 export async function POST(req: NextRequest) {
+  console.log(process.env.RAZORPAY_KEY_ID, process.env.RAZORPAY_KEY_SECRET);
   try {
     const { itemType, itemId, email } = await req.json();
 
@@ -81,11 +82,18 @@ export async function POST(req: NextRequest) {
       }
     });
 
+    // Add logging to debug the key
+    console.log("Razorpay key check:", {
+      keyExists: !!process.env.RAZORPAY_KEY_ID,
+      keyLength: process.env.RAZORPAY_KEY_ID ? process.env.RAZORPAY_KEY_ID.length : 0
+    });
+
     return NextResponse.json({
       orderId: order.id,
       amount,
       currency: "INR",
       purchaseId: purchase.id,
+      keyId: process.env.RAZORPAY_KEY_ID,
     });
 
   } catch (error) {

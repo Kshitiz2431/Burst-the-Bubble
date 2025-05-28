@@ -7,6 +7,7 @@ import debounce from "lodash/debounce";
 import { PDFPreviewModal } from "@/components/library/pdf-preview-modal";
 import { ImagePreviewModal } from "@/components/templates/image-preview-modal";
 import { PaymentSuccessModal } from "@/components/payment/success-modal";
+import { toast } from "sonner";
 
 type Category = {
   name: string;
@@ -126,41 +127,87 @@ export default function ResourcesPage() {
       const orderData = await orderResponse.json();
       if (!orderData.orderId) throw new Error("Failed to create order");
 
+      console.log("Order created:", orderData);
+
       // 2. Initialize Razorpay
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        key: orderData.keyId,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: "Your Company Name",
+        name: "Burst The Bubble",
         description: `Purchase ${resource.title}`,
         order_id: orderData.orderId,
         handler: async (response: any) => {
-          // 3. Verify payment
-          const verifyResponse = await fetch("/api/payment/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(response),
-          });
+          try {
+            console.log('Payment successful:', response);
+            
+            // 3. Verify payment
+            const verifyResponse = await fetch("/api/payment/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
 
-          const verifyData = await verifyResponse.json();
-          if (verifyData.success) {
+            const verifyData = await verifyResponse.json();
+            
+            if (!verifyResponse.ok) {
+              console.error('Payment verification failed:', verifyData);
+              throw new Error(verifyData.error || 'Payment verification failed');
+            }
+
+            console.log('Payment verified successfully:', verifyData);
+            
             setCurrentPurchase(verifyData.purchase);
             setPaymentSuccess(true);
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            toast.error(error instanceof Error ? error.message : "Payment verification failed");
           }
         },
         prefill: {
           email: "user@example.com", // Replace with real user email
         },
-        theme: {
-          color: "#d45c82",
+        modal: {
+          ondismiss: function() {
+            setIsProcessingPayment(false);
+            console.log('Payment modal closed by user');
+          },
         },
+        theme: {
+          color: "#e27396",
+        }
       };
 
-      const razorpay = new (window as any).Razorpay(options);
-      razorpay.open();
+      // Log the options for debugging
+      console.log("Razorpay options:", {
+        ...options,
+        key: options.key ? "Present" : "Missing", // Don't log the actual key
+      });
+
+      // Check if key is present
+      if (!options.key) {
+        console.error("Razorpay key is missing!");
+        toast.error("Payment configuration error. Please try again later.");
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      try {
+        const razorpay = new (window as any).Razorpay(options);
+        razorpay.on('payment.failed', function(response: any) {
+          console.error("Payment failed:", response.error);
+          toast.error(`Payment failed: ${response.error?.description || 'Unknown error'}`);
+          setIsProcessingPayment(false);
+        });
+        razorpay.open();
+      } catch (error) {
+        console.error("Razorpay initialization error:", error);
+        toast.error("Payment system initialization failed. Please try again later.");
+        setIsProcessingPayment(false);
+      }
     } catch (error) {
       console.error("Payment error:", error);
-    } finally {
+      toast.error("Failed to process payment. Please try again later.");
       setIsProcessingPayment(false);
     }
   };
