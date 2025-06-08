@@ -59,17 +59,17 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Resources</h3>
             <ul className="space-y-3">
-              <li>
+              {/* <li>
                 <Link
-                  href="/blog"
+                  href="/resources"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Blog
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link
-                  href="/guides"
+                  href="/resources"
                   className="text-gray-300 hover:text-white transition-colors"
                 >
                   Guides
