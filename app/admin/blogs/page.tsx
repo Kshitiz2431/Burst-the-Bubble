@@ -61,8 +61,9 @@ export default function BlogsListPage() {
       }
       const data = await response.json();
       setBlogs(data.blogs);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to load blogs");
+    } catch (err) {
+      console.error("Error fetching blogs:", err);
+      toast.error("Failed to fetch blogs");
     } finally {
       setLoading(false);
     }
@@ -97,7 +98,8 @@ export default function BlogsListPage() {
 
       setBlogs(currentBlogs => currentBlogs.filter(blog => blog.id !== blogToDelete));
       toast.success("Blog deleted successfully");
-    } catch (error) {
+    } catch (err) {
+      console.log(err);
       toast.error("Failed to delete blog");
     } finally {
       setIsDeleting(false);
@@ -173,7 +175,6 @@ export default function BlogsListPage() {
                   <TableCell className="font-medium">{blog.title}</TableCell>
                   <TableCell>
                     <Badge
-                      //@ts-ignore                    
                       variant={blog.status === "published" ? "success" : "default"}
                     >
                       {blog.status}

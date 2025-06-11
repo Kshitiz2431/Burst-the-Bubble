@@ -3,9 +3,9 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import HeroSection from "@/components/HeroSection";
 import FeatureCards from "@/components/FeatureCards";
-import NewsletterPage from "@/components/NewsletterPage";
+
 import AboutUsPreview from "@/components/AboutUsPreview";
-import Testimonials from "@/components/Testimonials";
+
 
 export default function Home() {
   const { scrollY } = useScroll();

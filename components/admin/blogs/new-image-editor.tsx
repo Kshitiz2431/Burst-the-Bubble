@@ -76,6 +76,7 @@ export function ImageEditor({ image, onSave, onCancel, aspect = 16 / 9 }: ImageE
 
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
     if (!initialCropSet && imgRef.current) {
+      console.log(e);
       const { width, height } = imgRef.current;
       const imageAspect = width / height;
       

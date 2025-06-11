@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient, BuddyRequestStatus } from "@prisma/client";
+import { PrismaClient,Prisma ,BuddyRequestStatus, BuddyRequestType} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -18,18 +18,18 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
     
     // Build where clause based on query parameters
-    const where: any = {};
+    const where: Prisma.BuddyRequestWhereInput = {};
     
-    if (status) {
-      where.status = status;
+    if (status && Object.values(BuddyRequestStatus).includes(status as BuddyRequestStatus)) {
+      where.status = status as BuddyRequestStatus;
     }
     
     if (buddyId) {
       where.assignedBuddyId = buddyId;
     }
     
-    if (type) {
-      where.type = type;
+    if (type && Object.values(BuddyRequestType).includes(type as BuddyRequestType)) {
+      where.type = type as BuddyRequestType;
     }
     
     // Get total count for pagination

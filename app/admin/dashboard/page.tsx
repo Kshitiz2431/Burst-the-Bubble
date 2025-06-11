@@ -3,7 +3,12 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, FileText, FolderTree, Clock } from "lucide-react";
+import { 
+  FileText, 
+  BookOpen, 
+  Tag,
+  TrendingUp,
+} from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 async function getStats() {
@@ -29,12 +34,14 @@ async function getStats() {
       recentContent,
     };
   } catch (error) {
+    console.log(error);
     throw new Error("Failed to fetch dashboard data");
   }
 }
 
-export default async function AdminDashboard() {
+export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
+  
   if (!session) {
     redirect("/admin/login");
   }
@@ -42,8 +49,26 @@ export default async function AdminDashboard() {
   let stats;
   try {
     stats = await getStats();
-  } catch (error) {
-    throw error; // This will trigger the error boundary
+  } catch (err) {
+    console.error("Error fetching stats:", err);
+    // Handle error gracefully
+    stats = {
+      blogs: 0,
+      library: 0,
+      templates: 0,
+      categories: 0,
+      recentContent: [],
+    };
+  }
+
+  if (!stats) {
+    stats = {
+      blogs: 0,
+      library: 0,
+      templates: 0,
+      categories: 0,
+      recentContent: [],
+    };
   }
 
   return (
@@ -52,8 +77,8 @@ export default async function AdminDashboard() {
         <h1 className="text-2xl font-bold">
           Welcome back, {session.user.name}
         </h1>
-        <p className="text-sm text-gray-500">
-          Here's an overview of your content
+        <p className="text-gray-600">
+          Welcome to your dashboard! Here&apos;s an overview of your content.
         </p>
       </div>
 
@@ -96,7 +121,7 @@ export default async function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Categories</CardTitle>
-            <FolderTree className="h-4 w-4 text-[#B33771]" />
+            <Tag className="h-4 w-4 text-[#B33771]" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.categories}</div>
@@ -120,7 +145,7 @@ export default async function AdminDashboard() {
                   <div>
                     <p className="font-medium">{content.title}</p>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="h-3 w-3" />
+                      <TrendingUp className="h-3 w-3" />
                       {formatDistanceToNow(new Date(content.createdAt), {
                         addSuffix: true,
                       })}

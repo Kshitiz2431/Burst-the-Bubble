@@ -1,7 +1,6 @@
 // app/admin/library/new/page.tsx
 "use client";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Upload, Eye } from "lucide-react";
 import { toast } from "sonner";
 import CreatableSelect from "react-select/creatable";
@@ -107,6 +106,7 @@ export default function NewLibraryItemPage() {
       return newCategoryOption;
       
     } catch (error) {
+      console.log(error);
       toast.error("Failed to create category");
       return null;
     }
@@ -169,8 +169,9 @@ export default function NewLibraryItemPage() {
 
       toast.success("Library item created successfully!");
 
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create library item");
+    } catch (err) {
+      console.error("Error creating library item:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to create library item");
     } finally {
       setIsSubmitting(false);
     }
@@ -361,10 +362,11 @@ export default function NewLibraryItemPage() {
 
       {showPDFPreview && formData.pdfFile && (
         <PDFPreviewModal
-          file={formData.pdfFile}
-          previewPages={formData.previewPages}
-          isAdmin={true}
+          isOpen={showPDFPreview}
           onClose={() => setShowPDFPreview(false)}
+          pdfUrl={URL.createObjectURL(formData.pdfFile)}
+          title={formData.title || "PDF Preview"}
+          previewPages={formData.previewPages}
         />
       )}
     </div>

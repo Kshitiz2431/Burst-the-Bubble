@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient, PurchaseStatus, BuddyMode } from "@prisma/client";
+import { PrismaClient, PurchaseStatus } from "@prisma/client";
 import { z } from "zod";
 import Razorpay from "razorpay";
 
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     });
     
     // Create or update payment record in database
-    const payment = await prisma.buddyPayment.upsert({
+     await prisma.buddyPayment.upsert({
       where: { buddyRequestId: buddyRequest.id },
       update: {
         razorpayOrderId: order.id,

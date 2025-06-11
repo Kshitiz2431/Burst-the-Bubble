@@ -2,22 +2,48 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Mail, Star, BookOpen, Gift, Clock, Lock, AlertTriangle, Shield } from 'lucide-react';
+import { Check, Mail, Star, BookOpen, Gift, Clock, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Script from 'next/script';
+
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayResponse) => void;
+  prefill: {
+    name: string;
+    email: string;
+  };
+  theme: {
+    color: string;
+  };
+}
+
+interface RazorpayInstance {
+  open: () => void;
+}
+
+interface RazorpayConstructor {
+  new (options: RazorpayOptions): RazorpayInstance;
+}
 
 // Add a TypeScript interface for the Razorpay window property
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: RazorpayConstructor;
   }
 }
-
 const premiumPlans = [
   {
     name: "Monthly Premium",
@@ -115,8 +141,9 @@ export default function NewsletterPage() {
     message: string;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  console.log(error);
   const [success, setSuccess] = useState<string | null>(null);
-
+  console.log(success);
   const handleFreeSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -198,7 +225,7 @@ export default function NewsletterPage() {
         name: "Burst The Bubble",
         description: `Premium Newsletter Subscription - ${selectedPlan === 'monthly' ? 'Monthly' : 'Yearly'} Plan`,
         order_id: data.orderId,
-        handler: async (response: any) => {
+        handler: async (response: RazorpayResponse) => {
           try {
             console.log('Payment successful:', response);
             
@@ -247,7 +274,8 @@ export default function NewsletterPage() {
 
       console.log('Initializing Razorpay with options:', options);
 
-      const razorpay = new (window as any).Razorpay(options);
+      // const razorpay = new (window as any).Razorpay(options);
+      const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
       console.error('Payment error:', error);
@@ -278,7 +306,7 @@ export default function NewsletterPage() {
         >
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             The Relationship Newsletter <br />
-            <span className="text-[#e27396]">You've Been Waiting For</span>
+            <span className="text-[#e27396]">You&rsquo;ve Been Waiting For</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             From casual dating advice to deep relationship insights,
@@ -462,18 +490,18 @@ export default function NewsletterPage() {
           
           <div className="space-y-8">
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">What's included in the free newsletter?</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">What&rsquo;s included in the free newsletter?</h3>
               <p className="text-gray-600">
                 Our free newsletter includes weekly relationship tips, selected love letter templates, 
-                and access to our basic articles. It's perfect for those just starting their relationship journey.
+                and access to our basic articles. It&rsquo;s perfect for those just starting their relationship journey.
               </p>
             </div>
             
             <div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">How does the premium subscription work?</h3>
               <p className="text-gray-600">
-                After subscribing, you'll receive immediate access to our premium content library, 
-                exclusive templates, and all premium benefits. You'll also get weekly premium newsletters with exclusive content.
+                After subscribing, you&rsquo;ll receive immediate access to our premium content library, 
+                exclusive templates, and all premium benefits. You&rsquo;ll also get weekly premium newsletters with exclusive content.
               </p>
             </div>
             
@@ -481,7 +509,7 @@ export default function NewsletterPage() {
               <h3 className="text-xl font-bold text-gray-900 mb-2">Can I cancel my premium subscription?</h3>
               <p className="text-gray-600">
                 Yes, you can cancel your premium subscription at any time from your account settings.
-                You'll continue to have access until the end of your billing period.
+                You&rsquo;ll continue to have access until the end of your billing period.
               </p>
             </div>
             
@@ -519,7 +547,7 @@ export default function NewsletterPage() {
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-gray-500">
-                  You're already subscribed to our free newsletter.
+                  You&rsquo;re already subscribed to our free newsletter.
                 </p>
                 <button
                   onClick={() => setSubscriptionStatus(null)}

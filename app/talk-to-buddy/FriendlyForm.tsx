@@ -10,10 +10,8 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import Script from "next/script";
 import {
   Popover,
   PopoverContent,
@@ -29,14 +27,12 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Define time slots
 const TIME_SLOTS = [
@@ -45,6 +41,35 @@ const TIME_SLOTS = [
   "Evening (3 PM - 6 PM)",
   "Night (6 PM - 9 PM)"
 ];
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }) => void;
+  prefill: {
+    name: string;
+    email: string;
+  };
+  theme: {
+    color: string;
+  };
+}
+
+interface RazorpayInstance {
+  open: () => void;
+}
+
+interface WindowWithRazorpay extends Window {
+  Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+}
 
 // Define the form schema with Zod
 const formSchema = z.object({
@@ -187,7 +212,11 @@ export default function FriendlyForm() {
         name: "Burst The Bubble",
         description: `Buddy Session (${form.getValues("mode")} - ${form.getValues("duration")} mins)`,
         order_id: orderData.orderId,
-        handler: async function (response: any) {
+        handler: async function (response:  {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) {
           try {
             // Verify payment
             const verifyResponse = await fetch("/api/buddy-payment/verify", {
@@ -250,8 +279,11 @@ export default function FriendlyForm() {
           color: "#e27396",
         },
       };
+
       
-      const razorpay = new (window as any).Razorpay(options);
+      
+      // const razorpay = new (window as any).Razorpay(options);
+      const razorpay = new (window as WindowWithRazorpay).Razorpay(options);
       razorpay.open();
       
     } catch (error) {
@@ -445,7 +477,7 @@ export default function FriendlyForm() {
               <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">4</div>
               <div>
                 <h3 className="font-medium text-gray-800">Crisis Support</h3>
-                <p className="text-gray-600">If you're experiencing a crisis, please contact emergency services or a mental health helpline.</p>
+                <p className="text-gray-600">If you&rsquo;re experiencing a crisis, please contact emergency services or a mental health helpline.</p>
               </div>
             </div>
             
@@ -477,7 +509,7 @@ export default function FriendlyForm() {
               <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">8</div>
               <div>
                 <h3 className="font-medium text-gray-800">Feedback</h3>
-                <p className="text-gray-600">We value your feedback to improve our service. You'll receive a feedback form after your session.</p>
+                <p className="text-gray-600">We value your feedback to improve our service. You&rsquo;ll receive a feedback form after your session.</p>
               </div>
             </div>
           </div>
@@ -512,7 +544,7 @@ export default function FriendlyForm() {
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-[#e27396] mb-2">Schedule with {buddyName}</h2>
           <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
-            Please select a convenient time slot from {buddyName}'s calendar. You'll receive a confirmation email once your appointment is scheduled.
+            Please select a convenient time slot from {buddyName}&rsquo;s calendar. You&rsquo;ll receive a confirmation email once your appointment is scheduled.
           </p>
         </div>
         
@@ -543,16 +575,16 @@ export default function FriendlyForm() {
   return (
     <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold text-[#e27396] mb-2">Let's Chat About Your Needs</h2>
+        <h2 className="text-2xl font-bold text-[#e27396] mb-2">Let&rsquo;s Chat About Your Needs</h2>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          👋 Hey there! We're here to help you navigate your relationships. Let's have a friendly conversation about what's on your mind!
+          👋 Hey there! We&rsquo;re here to help you navigate your relationships. Let&rsquo;s have a friendly conversation about what&rsquo;s on your mind!
         </p>
       </div>
 
       <div className="mb-8">
         <div className="flex justify-start mb-4">
           <div className="bg-[#e27396]/10 rounded-2xl p-4 max-w-[80%] relative chat-bubble">
-            <p className="text-gray-800">What's your name? We'd love to get to know you!</p>
+            <p className="text-gray-800">What&rsquo;s your name? We&rsquo;d love to get to know you!</p>
           </div>
         </div>
       </div>
@@ -586,7 +618,7 @@ export default function FriendlyForm() {
                 <FormItem>
                   <div className="flex justify-start mb-4">
                     <div className="bg-[#e27396]/10 rounded-2xl p-4 max-w-[80%] relative chat-bubble">
-                      <p className="text-gray-800">Great! And what's the best email to reach you?</p>
+                      <p className="text-gray-800">Great! And what&rsquo;s the best email to reach you?</p>
                     </div>
                   </div>
                   <FormControl>
@@ -767,7 +799,7 @@ export default function FriendlyForm() {
 
           <div className="flex justify-start mb-4">
             <div className="bg-[#e27396]/10 rounded-2xl p-4 max-w-[80%] relative chat-bubble">
-              <p className="text-gray-800">Tell us what's on your mind. What would you like to talk about?</p>
+              <p className="text-gray-800">Tell us what&rsquo;s on your mind. What would you like to talk about?</p>
             </div>
           </div>
 

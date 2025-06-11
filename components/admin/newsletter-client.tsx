@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {modules,formats} from "@/components/admin/blogs/quill-config"
 import "react-quill/dist/quill.snow.css";
 import {
   DropdownMenu,
@@ -134,6 +133,7 @@ export default function NewsletterPage({ initialSubscribers, stats }: Newsletter
       setEmailContent("");
       setSelectedEmails(new Set());
     } catch (error) {
+      console.log(error);
       toast.error("Failed to send newsletter");
     } finally {
       setIsSending(false);
@@ -272,6 +272,7 @@ export default function NewsletterPage({ initialSubscribers, stats }: Newsletter
       },
     },
   ];
+  console.log(columns);
 
   return (
     <div className="p-8 space-y-8">

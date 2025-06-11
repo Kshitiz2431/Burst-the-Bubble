@@ -10,10 +10,7 @@ import { Card } from "@/components/ui/card";
 import { S3Image } from "@/components/ui/s3-image";
 import Link from "next/link";
 import { 
-  Eye, 
   PlusCircle, 
-  Pencil, 
-  Trash2, 
   Download 
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -43,7 +40,8 @@ async function getLibraryItems() {
     });
 
     return items;
-  } catch (error) {
+  } catch (err) {
+    console.error("Error fetching library items:", err);
     throw new Error("Failed to fetch library items");
   }
 }

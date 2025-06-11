@@ -2,6 +2,8 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl as awsGetSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import type { GetObjectCommandInput } from "@aws-sdk/client-s3";
+
 
 
 const s3Client = new S3Client({
@@ -29,7 +31,7 @@ export async function deleteFileFromS3(key: string): Promise<void> {
 export async function getSignedUrl(
   key: string, 
   operation: 'get' | 'put',
-  additionalParams: Record<string, any> = {}
+  additionalParams: Partial<GetObjectCommandInput> = {}
 ): Promise<string> {
   const command = new GetObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME!,
@@ -66,7 +68,7 @@ export class S3UploadError extends Error {
   constructor(
     message: string,
     public readonly code?: string,
-    public readonly details?: any
+    public readonly details?: unknown
   ) {
     super(message);
     this.name = "S3UploadError";

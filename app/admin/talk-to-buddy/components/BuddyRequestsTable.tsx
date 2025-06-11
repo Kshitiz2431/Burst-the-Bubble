@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BuddyRequest, BuddyRequestStatus, BuddyRequestType, BuddyMode, Buddy } from "@prisma/client";
+import { BuddyRequest, BuddyRequestStatus, BuddyRequestType, Buddy } from "@prisma/client";
 import {
   Table,
   TableBody,
@@ -32,7 +32,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";

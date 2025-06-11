@@ -27,6 +27,7 @@ export function DeleteButton({ itemId }: DeleteButtonProps) {
       toast.success('Item deleted successfully');
       window.location.reload();
     } catch (error) {
+      console.log(error);
       toast.error('Failed to delete item');
     } finally {
       setIsDeleting(false);

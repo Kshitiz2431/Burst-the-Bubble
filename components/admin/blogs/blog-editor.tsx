@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import type { ReactQuillProps } from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 const ReactQuill = dynamic(() => import("react-quill"), {
@@ -71,12 +72,12 @@ interface BlogEditorProps {
 
 export function BlogEditor({ onChange, initialContent = "" }: BlogEditorProps) {
   const [mounted, setMounted] = useState(false);
-  const quillRef = useRef<any>(null);
+  const quillRef = useRef<ReactQuillProps>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       import("quill").then((Quill) => {
-        //@ts-ignore
+        //@ts-expect-error: ImageResize is a non-typed module
         import("quill-image-resize-module-react").then((ImageResize) => {
           Quill.default.register("modules/imageResize", ImageResize.default);
         });
@@ -126,7 +127,7 @@ export function BlogEditor({ onChange, initialContent = "" }: BlogEditorProps) {
         }
       `}</style>
       <ReactQuill
-        //@ts-ignore
+        //@ts-expect-error :react-quill type mismatch for ref
         ref={quillRef}
         theme="snow"
         modules={modules}

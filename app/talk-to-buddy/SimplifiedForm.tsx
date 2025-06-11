@@ -7,6 +7,7 @@ import GuidelinesBridge from "./GuidelinesBridge";
 export default function SimplifiedForm() {
   const [currentStep, setCurrentStep] = useState<'form' | 'payment' | 'guidelines' | 'calendly'>('form');
   const [buddyName, setBuddyName] = useState("Sarah");
+  console.log(setBuddyName);
 
   const handleSubmitForm = () => {
     console.log("Form submitted");

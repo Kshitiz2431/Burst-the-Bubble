@@ -63,6 +63,7 @@ export function CategorySelect({ value = [], onChange }: CategorySelectProps) {
         const selected = data.filter((cat: Category) => value.includes(cat.id));
         setSelectedCategories(selected);
       } catch (error) {
+        console.log(error);
         toast.error("Failed to load categories");
       } finally {
         setIsLoading(false);
@@ -174,7 +175,7 @@ export function CategorySelect({ value = [], onChange }: CategorySelectProps) {
                   onClick={() => setShowNewCategoryDialog(true)}
                 >
                   <Plus className="h-4 w-4" />
-                  Create "{searchTerm}"
+                  Create &quot;{searchTerm}&quot;
                 </button>
               )}
             </CommandEmpty>
@@ -221,7 +222,7 @@ export function CategorySelect({ value = [], onChange }: CategorySelectProps) {
           </DialogHeader>
           <div className="py-4">
             <h4 className="text-sm font-medium mb-2">Category Name</h4>
-            <p className="text-sm text-muted-foreground mb-4">"{searchTerm}"</p>
+            <p className="text-sm text-muted-foreground mb-4">&quot;{searchTerm}&quot;</p>
             {existingCategory && (
               <p className="text-sm text-red-500">
                 This category already exists. Please select it from the list

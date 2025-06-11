@@ -18,15 +18,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Form,
@@ -45,7 +40,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Pencil, Trash2, Plus, UserPlus, RefreshCw } from "lucide-react";
+import { Pencil, Trash2, UserPlus, RefreshCw } from "lucide-react";
 
 // Type for Buddy with request count
 interface BuddyWithCount extends Buddy {
@@ -417,7 +412,7 @@ export function BuddyManagement({ setError }: BuddyManagementProps) {
                       <Input placeholder="https://calendly.com/username" {...field} className="border-gray-300 focus:border-[#B33771] focus:ring-[#B33771]" />
                     </FormControl>
                     <FormDescription className="text-gray-500 text-sm">
-                      The Calendly link for this buddy's scheduling
+                      The Calendly link for this buddy&rsquo;s scheduling
                     </FormDescription>
                     <FormMessage className="text-red-500" />
                   </FormItem>

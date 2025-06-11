@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 export function AdminNav() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  console.log(status);
   const isLoginPage =
     pathname === "/admin/login" || pathname === "/admin/signup";
 

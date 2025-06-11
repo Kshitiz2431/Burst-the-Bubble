@@ -8,19 +8,13 @@ import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import CreatableSelect from "react-select/creatable";
 import { toast } from "sonner";
-import { QuillImage } from "@/components/admin/blogs/quill-image";
-import {  processContentBeforeSave, processContentAfterLoad } from "@/components/admin/blogs/quill-config";
+import {  processContentBeforeSave } from "@/components/admin/blogs/quill-config";
 import "react-quill/dist/quill.snow.css";
 
 import { ImageEditor } from "@/components/admin/blogs/new-image-editor";
 
 // In your component:
 
-import {
-  S3UploadError,
-  uploadBlogCoverImageToS3,
-  uploadQuillImageToS3,
-} from "@/lib/s3";
 import { ImageUpload } from "@/components/admin/blogs/image-upload";
 import "react-quill/dist/quill.snow.css";
 import { Quill } from "react-quill";
@@ -115,7 +109,13 @@ export const modules = {
           const file = input.files?.[0];
           if (!file) return;
 
-          const quill = (this as any).quill;
+          const quill = (this as unknown as { 
+            quill: { 
+              getSelection: (focus: boolean) => { index: number };
+              insertEmbed: (index: number, type: string, value: Record<string, unknown>) => void;
+              setSelection: (index: number) => void;
+            } 
+          }).quill;
           const range = quill.getSelection(true);
 
           // Create and show modal with ImageEditor
@@ -212,164 +212,6 @@ export const formats = [
 ];
 
 
-
-// const modules = {
-//   toolbar: {
-//     container: [
-//       [{ header: [1, 2, 3, 4, 5, 6, false] }],
-//       ["bold", "italic", "underline", "strike"],
-//       [{ color: [] }, { background: [] }],
-//       [{ align: [] }],
-//       [{ list: "ordered" }, { list: "bullet" }],
-//       [{ indent: "-1" }, { indent: "+1" }],
-//       ["blockquote", "code-block"],
-//       ["link", "image"],
-//       [{ script: "sub" }, { script: "super" }],
-//       [{ font: [] }],
-//       [{ size: ["small", false, "large", "huge"] }],
-//       ["clean"],
-//     ],
-//     handlers: {
-//       image: async function () {
-//         return new Promise((resolve) => {
-//           const input = document.createElement("input");
-//           input.setAttribute("type", "file");
-//           input.setAttribute("accept", "image/png, image/jpeg");
-//           input.click();
-
-//           input.onchange = async () => {
-//             const file = input.files?.[0];
-//             if (!file) return;
-
-//             const quill = (this as any).quill;
-//             const range = quill.getSelection(true);
-
-//             // Create and show modal with NewImageEditor
-//             const editorContainer = document.createElement('div');
-//             editorContainer.style.position = 'fixed';
-//             editorContainer.style.top = '0';
-//             editorContainer.style.left = '0';
-//             editorContainer.style.width = '100%';
-//             editorContainer.style.height = '100%';
-//             editorContainer.style.zIndex = '9999';
-//             document.body.appendChild(editorContainer);
-
-//             const root = ReactDOM.createRoot(editorContainer);
-            
-//             root.render(
-//               <ImageEditor
-//                 image={file}
-//                 aspect={16/9}
-//                 onSave={async (croppedImage) => {
-//                   try {
-//                     // Show loading placeholder
-//                     quill.insertEmbed(range.index, "image", "/placeholder-image.jpg");
-//                     quill.setSelection(range.index + 1);
-
-//                     // Get signed URL and upload
-//                     const response = await fetch("/api/upload", {
-//                       method: "POST",
-//                       headers: { "Content-Type": "application/json" },
-//                       body: JSON.stringify({
-//                         filename: croppedImage.name,
-//                         contentType: croppedImage.type,
-//                         type: "content",
-//                       }),
-//                     });
-
-//                     if (!response.ok) {
-//                       throw new Error("Failed to get upload URL");
-//                     }
-
-//                     const { signedUrl, key } = await response.json();
-
-//                     // Upload to S3
-//                     const uploadResponse = await fetch(signedUrl, {
-//                       method: "PUT",
-//                       body: croppedImage,
-//                       headers: { "Content-Type": croppedImage.type },
-//                     });
-
-//                     if (!uploadResponse.ok) {
-//                       throw new Error("Failed to upload image");
-//                     }
-
-//                     // Get a fresh signed URL for display
-//                     const displayUrlResponse = await fetch(`/api/image/${key}`);
-//                     if (!displayUrlResponse.ok) {
-//                       throw new Error("Failed to get display URL");
-//                     }
-//                     const { url: displayUrl } = await displayUrlResponse.json();
-
-//                     // Store both URLs in a data attribute
-//                     const [leaf] = quill.getLeaf(range.index);
-//                     const index = quill.getIndex(leaf);
-//                     quill.deleteText(index, 1);
-
-//                     // Insert the image with the display URL
-//                     quill.insertEmbed(index, "image", displayUrl);
-
-//                     // Add a data attribute with our API URL format for storage
-//                     const imageNode = quill.container.querySelector(`img[src="${displayUrl}"]`);
-//                     if (imageNode) {
-//                       imageNode.dataset.apiUrl = `/api/image/${key}`;
-//                     }
-
-//                     quill.setSelection(index + 1);
-//                     toast.success("Image uploaded successfully");
-//                   } catch (error) {
-//                     toast.error(
-//                       error instanceof Error ? error.message : "Failed to upload image"
-//                     );
-//                     // Remove placeholder if upload failed
-//                     const [leaf] = quill.getLeaf(range.index);
-//                     const index = quill.getIndex(leaf);
-//                     quill.deleteText(index, 1);
-//                   } finally {
-//                     // Clean up
-//                     root.unmount();
-//                     document.body.removeChild(editorContainer);
-//                   }
-//                 }}
-//                 onCancel={() => {
-//                   root.unmount();
-//                   document.body.removeChild(editorContainer);
-//                 }}
-//               />
-//             );
-//           };
-//         });
-//       },
-//     },
-//   },
-//   clipboard: {
-//     matchVisual: false,
-//   },
-// };
-         
-    
-              
-// const formats = [
-//   "header",
-//   "font",
-//   "size",
-//   "bold",
-//   "italic",
-//   "underline",
-//   "strike",
-//   "color",
-//   "background",
-//   "script",
-//   "align",
-//   "list",
-//   "bullet",
-//   "indent",
-//   "link",
-//   "image",
-//   "blockquote",
-//   "code-block",
-// ];
-
 export default function NewBlogPage() {
   const [formData, setFormData] = useState<BlogFormData>({
     title: "",
@@ -463,9 +305,9 @@ export default function NewBlogPage() {
       toast.success(`Category "${inputValue}" created`);
       return newCategoryOption;
       
-    } catch (error) {
+    } catch (err) {
+      console.error("Error creating category:", err);
       toast.error("Failed to create category");
-      // Return null or throw error to prevent select from adding the option
       return null;
     }
   };
@@ -526,7 +368,8 @@ export default function NewBlogPage() {
           }
 
           imageKey = key;
-        } catch (error) {
+        } catch (err) {
+          console.log(err);
           throw new Error("Failed to upload featured image");
         }
       }
@@ -557,13 +400,9 @@ export default function NewBlogPage() {
       toast.success("Blog post created successfully!");
       // Redirect to blog list or clear form
       // router.push("/admin/blogs");
-    } catch (error) {
-      setError(
-        error instanceof Error ? error : new Error("Something went wrong")
-      );
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create blog post"
-      );
+    } catch (err) {
+      console.error("Error submitting blog:", err);
+      toast.error("Failed to create blog");
     } finally {
       setIsSubmitting(false);
     }

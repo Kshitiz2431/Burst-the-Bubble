@@ -4,7 +4,6 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { S3Image } from "@/components/ui/s3-image";
-import { PDFPreview } from "@/components/library/pdf-preview";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AdminPDFViewer } from "@/components/library/admin-pdf-viewer";

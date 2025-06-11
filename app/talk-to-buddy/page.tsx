@@ -20,8 +20,8 @@ export default function TalkToBuddyPage() {
       >
         <h1 className="text-4xl font-bold mb-4 text-gray-900">Talk to a Buddy</h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
-          Connect with a supportive buddy who's ready to listen. Choose the form
-          type that suits your needs and we'll match you with someone who can help.
+          Connect with a supportive buddy who&rsquo;s ready to listen. Choose the form
+          type that suits your needs and we&rsquo;ll match you with someone who can help.
         </p>
       </motion.div>
 

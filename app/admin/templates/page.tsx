@@ -7,10 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { 
-  Eye, 
   PlusCircle, 
   Pencil, 
-  Trash2, 
   Download,
   FileText,
   ArrowDownToLine 
@@ -42,6 +40,7 @@ async function getTemplates() {
 
     return templates;
   } catch (error) {
+    console.log(error);
     throw new Error("Failed to fetch templates");
   }
 }

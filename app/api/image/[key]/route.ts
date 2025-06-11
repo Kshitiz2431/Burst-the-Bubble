@@ -3,9 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 // import { getSignedUrl } from "@/lib/s3";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../auth/[...nextauth]/route";
-import { prisma as db } from "@/lib/prisma";
+
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION!,

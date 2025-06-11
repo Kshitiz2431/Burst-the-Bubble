@@ -9,10 +9,8 @@ import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import Script from "next/script";
 import {
   Popover,
   PopoverContent,
@@ -35,6 +33,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
+
+interface RazorpayResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
 
 // Define time slots
 const TIME_SLOTS = [
@@ -189,7 +194,7 @@ export default function DetailedForm() {
         name: "Burst The Bubble",
         description: `Buddy Session (${form.getValues("mode")} - ${form.getValues("duration")} mins)`,
         order_id: orderData.orderId,
-        handler: async function (response: any) {
+        handler: async function (response: RazorpayResponse) {
           try {
             // Verify payment
             const verifyResponse = await fetch("/api/buddy-payment/verify", {
@@ -254,7 +259,9 @@ export default function DetailedForm() {
         },
       };
       
-      const razorpay = new (window as any).Razorpay(options);
+      // const razorpay = new (window as any).Razorpay(options);
+      const razorpay = new (window as typeof window & { Razorpay: new (options: unknown) => { open: () => void } }).Razorpay(options);
+
       razorpay.open();
       
     } catch (error) {
@@ -422,7 +429,7 @@ export default function DetailedForm() {
               <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">4</div>
               <div>
                 <h3 className="font-medium text-gray-800">Crisis Support</h3>
-                <p className="text-gray-600">If you're experiencing a crisis, please contact emergency services or a mental health helpline.</p>
+                <p className="text-gray-600">If you&rsquo;re experiencing a crisis, please contact emergency services or a mental health helpline.</p>
               </div>
             </div>
             
@@ -454,7 +461,7 @@ export default function DetailedForm() {
               <div className="flex-shrink-0 bg-[#e27396] text-white w-8 h-8 rounded-full flex items-center justify-center">8</div>
               <div>
                 <h3 className="font-medium text-gray-800">Feedback</h3>
-                <p className="text-gray-600">We value your feedback to improve our service. You'll receive a feedback form after your session.</p>
+                <p className="text-gray-600">We value your feedback to improve our service. You&rsquo;ll receive a feedback form after your session.</p>
               </div>
             </div>
           </div>
@@ -489,7 +496,7 @@ export default function DetailedForm() {
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-[#e27396] mb-2">Schedule with {buddyName}</h2>
           <p className="text-gray-600 mb-4 max-w-2xl mx-auto">
-            Please select a convenient time slot from {buddyName}'s calendar. You'll receive a confirmation email once your appointment is scheduled.
+            Please select a convenient time slot from {buddyName}&rsquo;s calendar. You&rsquo;ll receive a confirmation email once your appointment is scheduled.
           </p>
         </div>
         

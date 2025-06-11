@@ -15,7 +15,6 @@ interface PreviewButtonProps {
 
 export function PreviewButton({
   itemId,
-  pdfUrl,
   title,
   previewPages
 }: PreviewButtonProps) {

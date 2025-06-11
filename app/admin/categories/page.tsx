@@ -46,7 +46,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,10 +54,10 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     // Redirect if not authenticated
-    if (status === "unauthenticated") {
+    if (session === null) {
       router.push("/admin/login");
     }
-  }, [status, router]);
+  }, [session, router]);
 
   const fetchCategories = async (retryCount = 0, maxRetries = 2) => {
     try {
@@ -122,13 +122,11 @@ export default function CategoriesPage() {
   };
 
   useEffect(() => {
-    if (status === "authenticated") {
-      fetchCategories();
-    }
-  }, [status]);
+    fetchCategories();
+  }, []);
 
   // Show loading state while checking authentication or fetching data
-  if (status === "loading" || (status === "authenticated" && isLoading)) {
+  if (session === null || isLoading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[400px]">
         <Loader2 className="w-8 h-8 animate-spin text-[#e27396]" />
@@ -137,7 +135,7 @@ export default function CategoriesPage() {
   }
 
   // Don't render anything if not authenticated
-  if (status === "unauthenticated") {
+  if (session === null) {
     return null;
   }
 

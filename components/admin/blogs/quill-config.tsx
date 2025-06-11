@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom/client';
 import { ImageEditor } from "./new-image-editor";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from 'uuid';
+import Quill from 'quill';
+
 
 export const modules = {
   toolbar: {
@@ -32,7 +34,9 @@ export const modules = {
           const file = input.files?.[0];
           if (!file) return;
 
-          const quill = (this as any).quill;
+          // const quill = (this as any).quill;
+          const quill = (this as unknown as { quill: Quill }).quill;
+
           const range = quill.getSelection(true);
 
           try {
@@ -70,13 +74,14 @@ export const modules = {
                     
                     // Upload the image using our helper
                     const { apiUrl, key } = await uploadImage(croppedImage);
+                    console.log(apiUrl);
                     
                     // Get the signed URL for display
                     const signedUrlResponse = await getImageUrl(encodeURIComponent(key));
                     
                     // Insert the image into the editor
                     quill.insertEmbed(range.index, 'image', signedUrlResponse);
-                    quill.setSelection(range.index + 1);
+                    quill.setSelection({index:range.index+1,length:0});
                     
                     // Add data-key using basic DOM
                     const imageElements = quill.root.getElementsByTagName('img') as HTMLCollectionOf<HTMLImageElement>;

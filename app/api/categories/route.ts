@@ -14,7 +14,7 @@ const categorySchema = z.object({
 });
 
 // Helper function to format Prisma errors for better logging and user feedback
-function handlePrismaError(error: any): string {
+function handlePrismaError(error: unknown): string {
   console.error("Prisma Error:", error);
   
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -218,7 +218,7 @@ export async function POST(req: NextRequest) {
           OR: [
             { name: { equals: name, mode: 'insensitive' } },
             slug && { slug: { equals: slug, mode: 'insensitive' } },
-          ].filter(Boolean) as any,
+          ].filter(Boolean) as Prisma.CategoryWhereInput[],
           isActive: true,
         },
       });

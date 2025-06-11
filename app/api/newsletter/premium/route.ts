@@ -3,10 +3,10 @@ import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { sendEmail } from '@/lib/email';
 import crypto from 'crypto';
-import { Resend } from 'resend';
+
 import Razorpay from 'razorpay';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Initialize Razorpay
 const razorpay = new Razorpay({

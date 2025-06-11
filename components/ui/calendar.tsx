@@ -2,12 +2,13 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { DayPicker, DayPickerProps } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+// export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = DayPickerProps
 
 function Calendar({
   className,
@@ -56,12 +57,10 @@ function Calendar({
       }}
       components={
         {
-          // Override the header to remove the weekday labels.
-          Head: () => null,
           // Override icons (using type assertion to bypass TS error)
-          IconLeft: ({ ...props }: any) => <ChevronLeft className="h-4 w-4" />,
-          IconRight: ({ ...props }: any) => <ChevronRight className="h-4 w-4" />,
-        } as any
+          IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+          IconRight: () => <ChevronRight className="h-4 w-4" />,
+        }
       }
       {...props}
     />

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dialog, DialogOverlay, DialogPortal, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";

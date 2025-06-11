@@ -50,6 +50,7 @@ export function PublishButton({
         router.refresh();
       }
     } catch (error) {
+      console.log(error);
       toast.error("Failed to update publish status");
     } finally {
       setIsLoading(false);

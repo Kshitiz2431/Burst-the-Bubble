@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     // Create a new subscriber
     const token = crypto.randomBytes(32).toString('hex');
     
-    const subscriber = await prisma.newsletterSubscriber.create({
+     await prisma.newsletterSubscriber.create({
       data: {
         email: validatedData.email,
         token,

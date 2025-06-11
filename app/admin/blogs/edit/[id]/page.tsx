@@ -8,10 +8,8 @@ import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import CreatableSelect from "react-select/creatable";
 import { toast } from "sonner";
-import { QuillImage } from "@/components/admin/blogs/quill-image";
 import { ImageEditor } from "@/components/admin/blogs/new-image-editor";
 import { ImageUpload } from "@/components/admin/blogs/image-upload";
-import { Image } from "@/components/Image";
 import "react-quill/dist/quill.snow.css";
 import { Quill } from "react-quill";
 import { processContentAfterLoad, uploadImage, getImageUrl } from "@/components/admin/blogs/quill-config";
@@ -231,7 +229,12 @@ const modules = {
           const file = input.files?.[0];
           if (!file) return;
           
-          const quill = (this as any).quill;
+          const quill = (this as unknown as { quill: { 
+            getSelection: (focus: boolean) => { index: number };
+            insertEmbed: (index: number, type: string, value: string) => void;
+            setSelection: (index: number) => void;
+            root: HTMLElement;
+          } }).quill;
           const range = quill.getSelection(true);
           
           // Create editor container with explicit z-index that overrides toast
@@ -271,7 +274,7 @@ const modules = {
                     }
                     
                     // Upload the image using our helper
-                    const { apiUrl, key } = await uploadImage(croppedImage);
+                    const { key } = await uploadImage(croppedImage);
                     
                     // Get the signed URL for display
                     const signedUrlResponse = await getImageUrl(encodeURIComponent(key));
@@ -412,8 +415,8 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
           slug: blog.slug,
         });
         setOriginalSlug(blog.slug);
-      } catch (error) {
-        setError(error instanceof Error ? error : new Error("Failed to fetch blog"));
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Failed to fetch blog"));
         toast.error("Failed to fetch blog");
       } finally {
         setIsLoading(false);
@@ -481,6 +484,7 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
       return newCategoryOption;
       
     } catch (error) {
+      console.log(error);
       toast.error("Failed to create category");
       return null;
     }
@@ -528,6 +532,7 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
 
           imageKey = key;
         } catch (error) {
+          console.log(error);
           throw new Error("Failed to upload featured image");
         }
       } else if (typeof formData.featuredImage === 'string') {
@@ -645,9 +650,9 @@ export default function EditBlogPage({ params }: { params: { id: string } }) {
       toast.success("Blog post updated successfully!");
       router.push("/admin/blogs");
       router.refresh();
-    } catch (error) {
-      setError(error instanceof Error ? error : new Error("Something went wrong"));
-      toast.error(error instanceof Error ? error.message : "Failed to update blog post");
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Something went wrong"));
+      toast.error(err instanceof Error ? err.message : "Failed to update blog post");
     } finally {
       setIsSubmitting(false);
     }

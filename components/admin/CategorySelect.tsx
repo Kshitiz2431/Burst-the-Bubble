@@ -44,6 +44,8 @@ export function CategorySelect({
     }
   };
 
+  console.log(fetchCategories);
+
   // Create new category
   const handleCreateCategory = async () => {
     if (!newCategory.trim()) return;
@@ -76,7 +78,7 @@ export function CategorySelect({
           <CommandInput placeholder="Search categories..." />
           <CommandEmpty>
             <div className="flex items-center gap-2 p-2">
-              <span>Create "{newCategory}"</span>
+              <span>Create &quot;{newCategory}&quot;</span>
               <Button
                 size="sm"
                 onClick={handleCreateCategory}

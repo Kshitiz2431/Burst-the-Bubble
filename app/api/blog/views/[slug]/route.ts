@@ -18,6 +18,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { error: "Failed to update views" },
       { status: 500 }

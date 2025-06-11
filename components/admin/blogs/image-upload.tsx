@@ -90,7 +90,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import ReactDOM from 'react-dom/client';
 import { toast } from "sonner";
 import { Upload } from "lucide-react";
 import { ImageEditor } from "./new-image-editor";
@@ -103,6 +102,7 @@ interface ImageUploadProps {
 }
 
 export function ImageUpload({ type, value, displayUrl, onChange }: ImageUploadProps) {
+  console.log(type);
   const [preview, setPreview] = useState<string | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);

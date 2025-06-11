@@ -1,7 +1,7 @@
 // app/admin/templates/new/page.tsx
 "use client";
 import { useState, useEffect } from "react";
-import { Upload, Eye } from "lucide-react";
+import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { uploadFileToS3 } from "@/lib/upload";
+
+import { useRouter } from "next/navigation";
 
 interface TemplateFormData {
   title: string;
@@ -51,6 +52,7 @@ export default function NewTemplatePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [categoryError, setCategoryError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -109,6 +111,7 @@ export default function NewTemplatePage() {
       return newCategoryOption;
       
     } catch (error) {
+      console.log(error);
       toast.error("Failed to create category");
       return null;
     }
@@ -128,36 +131,32 @@ export default function NewTemplatePage() {
     setIsSubmitting(true);
 
     try {
-      if (!formData.title.trim()) throw new Error("Title is required");
-      if (!formData.description.trim()) throw new Error("Description is required");
-      if (formData.price !== null && formData.price < 0) throw new Error("Price cannot be negative");
-      if (!formData.imageFile) throw new Error("Please upload a template image");
-      if (formData.categories.length === 0) throw new Error("Please select at least one category");
+      if (!formData.imageFile) {
+        throw new Error('Please upload a template file');
+      }
 
-      const imageUpload = await uploadFileToS3(formData.imageFile, 'template');
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('price', (formData.price || 0).toString());
+      formDataToSend.append('categoryId', formData.categories[0]?.value || '');
+      formDataToSend.append('templateFile', formData.imageFile);
+      formDataToSend.append('thumbnailFile', formData.imageFile);
 
-      const response = await fetch('/api/templates', {
+      const response = await fetch('/api/admin/templates', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          price: formData.price,
-          categories: formData.categories.map(cat => cat.value),
-          imageUrl: imageUpload.key,
-          type: formData.type,
-        }),
+        body: formDataToSend,
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create template');
+        throw new Error('Failed to create template');
       }
 
-      toast.success("Template created successfully!");
-
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create template");
+      toast.success('Template created successfully!');
+      router.push('/admin/templates');
+    } catch (err) {
+      console.error('Error creating template:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to create template');
     } finally {
       setIsSubmitting(false);
     }

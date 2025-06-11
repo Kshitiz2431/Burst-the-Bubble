@@ -39,6 +39,7 @@ export function DownloadButton({ itemId, fileName }: DownloadButtonProps) {
 
       toast.success("Download started");
     } catch (error) {
+      console.log(error);
       toast.error("Failed to download file");
     } finally {
       setIsDownloading(false);

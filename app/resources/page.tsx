@@ -1,11 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Search, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import debounce from "lodash/debounce";
 import { PDFPreviewModal } from "@/components/library/pdf-preview-modal";
-import { ImagePreviewModal } from "@/components/templates/image-preview-modal";
 import { PaymentSuccessModal } from "@/components/payment/success-modal";
 import { toast } from "sonner";
 
@@ -25,6 +24,13 @@ type Resource = {
   price?: number;
   categories: Category[];
   type: "blog" | "library" | "template";
+};
+
+type Purchase = {
+  itemId: string;
+  itemType: 'library' | 'template';
+  itemTitle: string;
+  // Add other purchase properties as needed
 };
 
 // Enhanced image loader component with animations
@@ -93,7 +99,7 @@ export default function ResourcesPage() {
   const [previewResource, setPreviewResource] = useState<Resource | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [currentPurchase, setCurrentPurchase] = useState<any>(null);
+  const [currentPurchase, setCurrentPurchase] = useState<Purchase | null>(null);
 
   // Fetch signed URL for images
   const fetchImageUrl = async (key: string) => {
@@ -137,7 +143,7 @@ export default function ResourcesPage() {
         name: "Burst The Bubble",
         description: `Purchase ${resource.title}`,
         order_id: orderData.orderId,
-        handler: async (response: any) => {
+        handler: async (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) => {
           try {
             console.log('Payment successful:', response);
             
@@ -193,8 +199,8 @@ export default function ResourcesPage() {
       }
 
       try {
-        const razorpay = new (window as any).Razorpay(options);
-        razorpay.on('payment.failed', function(response: any) {
+        const razorpay = new ((window as { Razorpay: new (options: Record<string, unknown>) => { open: () => void; on: (event: string, handler: (response: { error: { description: string } }) => void) => void } }).Razorpay)(options);
+        razorpay.on('payment.failed', function(response: { error: { description: string } }) {
           console.error("Payment failed:", response.error);
           toast.error(`Payment failed: ${response.error?.description || 'Unknown error'}`);
           setIsProcessingPayment(false);
@@ -249,7 +255,7 @@ export default function ResourcesPage() {
   }, []);
 
   // Debounced search + filter function
-  const updateFilters = debounce(() => {
+  const updateFilters = useCallback(() => {
     const filtered = resources.filter((resource) => {
       // Match each search term
       const searchMatch = searchQuery
@@ -271,12 +277,14 @@ export default function ResourcesPage() {
     });
 
     setFilteredResources(filtered);
-  }, 300);
+  }, [resources, searchQuery, selectedType, selectedCategory]);
 
   // Run filter whenever resources, search, or selections change
   useEffect(() => {
-    updateFilters();
-  }, [resources, searchQuery, selectedType, selectedCategory]);
+    const debouncedUpdate = debounce(updateFilters, 300);
+    debouncedUpdate();
+    return () => debouncedUpdate.cancel();
+  }, [updateFilters]);
 
   const resourceTypes = [
     { id: "all", label: "All Resources" },
@@ -454,151 +462,141 @@ export default function ResourcesPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05, duration: 0.3 }}
-                    className={`group ${getCardBackground(resource.type)} rounded-xl overflow-hidden 
-                              shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-sm`}
+                    className={`
+                      group relative rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300
+                      ${getCardBackground(resource.type)}
+                    `}
                   >
-                    {/* Only show image section if we have a valid key */}
+                    {/* Resource Image */}
                     {coverOrImageKey && (
                       <ImageWithLoader
-                        src={imageUrls[coverOrImageKey]}
+                        src={imageUrls[coverOrImageKey] || coverOrImageKey}
                         alt={resource.title}
                         resourceType={resource.type}
                       />
                     )}
 
+                    {/* Resource Content */}
                     <div className="p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-[#e27396] transition-colors">
+                        {resource.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                        {resource.description || resource.excerpt}
+                      </p>
+
                       {/* Categories */}
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="flex flex-wrap gap-2 mb-4">
                         {resource.categories.map((category) => (
                           <span
                             key={category.slug}
-                            className="px-2 py-1 bg-white/70 backdrop-blur-sm text-[#e27396] text-xs rounded-full 
-                                      font-medium shadow-sm"
+                            className="px-2 py-1 text-xs rounded-full bg-[#e27396]/10 text-[#e27396]"
                           >
                             {category.name}
                           </span>
                         ))}
                       </div>
 
-                      {/* Title */}
-                      <h3
-                        className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-[#e27396] 
-                                transition-colors line-clamp-2"
-                      >
-                        {resource.title}
-                      </h3>
-
-                      {/* Description / Excerpt */}
-                      <p className="text-gray-600 mb-4 line-clamp-2">
-                        {resource.description || resource.excerpt}
-                      </p>
-
-                      {/* Bottom Section: Price + Buttons */}
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                        {resource.price !== undefined && (
-                          <span className="text-[#e27396] font-medium text-lg">
-                            {resource.price === 0 ? "Free" : `₹${resource.price}`}
-                          </span>
+                      {/* Action Buttons */}
+                      <div className="flex justify-between items-center mt-4">
+                        {resource.type === "blog" ? (
+                          <Link
+                            href={`/blog/${resource.slug}`}
+                            className="inline-flex items-center text-sm font-medium text-[#e27396] hover:text-[#d45c82] transition-colors"
+                          >
+                            Read More
+                            <svg
+                              className="ml-1 w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </Link>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setPreviewResource(resource);
+                              setPreviewOpen(true);
+                            }}
+                            className="inline-flex items-center text-sm font-medium text-[#e27396] hover:text-[#d45c82] transition-colors"
+                          >
+                            Preview
+                            <svg
+                              className="ml-1 w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          </button>
                         )}
 
-                        <div className="flex gap-2">
-                          {(resource.type === "template" ||
-                            resource.type === "library") && (
-                            <>
-                              <button
-                                onClick={() => {
-                                  setPreviewOpen(true);
-                                  setPreviewResource(resource);
-                                }}
-                                className="px-4 py-2 rounded-lg bg-white text-[#e27396] font-medium border border-[#e27396]/20
-                                          hover:bg-[#e27396]/10 transition-colors duration-300 shadow-sm"
-                              >
-                                Preview
-                              </button>
-                              <button
-                                onClick={() => handlePayment(resource)}
-                                disabled={isProcessingPayment}
-                                className="px-4 py-2 rounded-lg bg-[#e27396] text-white font-medium 
-                                          hover:bg-[#d45c82] transition-colors duration-300 shadow-sm"
-                              >
-                                {isProcessingPayment ? "Processing..." : "Buy Now"}
-                              </button>
-                            </>
-                          )}
-                          {resource.type === "blog" && (
-                            <Link
-                              href={`/blog/${resource.slug}`}
-                              className="px-4 py-2 rounded-lg bg-[#e27396] text-white font-medium 
-                                        hover:bg-[#d45c82] transition-colors duration-300 shadow-sm"
-                            >
-                              View Details
-                            </Link>
-                          )}
-                        </div>
+                        {resource.type !== "blog" && (
+                          <button
+                            onClick={() => handlePayment(resource)}
+                            disabled={isProcessingPayment}
+                            className="inline-flex items-center px-4 py-2 rounded-lg bg-[#e27396] text-white text-sm font-medium hover:bg-[#d45c82] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isProcessingPayment ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                Buy Now
+                                {resource.price && (
+                                  <span className="ml-1">₹{resource.price}</span>
+                                )}
+                              </>
+                            )}
+                          </button>
+                        )}
                       </div>
                     </div>
                   </motion.div>
                 );
               })}
             </AnimatePresence>
-
-            {/* No Results */}
-            {!isLoading && filteredResources.length === 0 && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-12 col-span-3"
-              >
-                <p className="text-gray-600 text-lg">
-                  No resources found matching your criteria. Try adjusting your search
-                  or filters.
-                </p>
-              </motion.div>
-            )}
           </motion.div>
         )}
 
-        {/* Preview Modals */}
-        {previewResource && previewResource.type === "library" && (
-          <PDFPreviewModal
-            isOpen={previewOpen}
-            onClose={() => {
-              setPreviewOpen(false);
-              setPreviewResource(null);
-            }}
-            pdfUrl={`/api/library/${previewResource.id}/pdf`}
-            title={previewResource.title}
-            previewPages={3}
-          />
-        )}
-
-        {previewResource &&
-          previewResource.type === "template" &&
-          previewResource.imageUrl && (
-            <ImagePreviewModal
-              isOpen={previewOpen}
-              onClose={() => {
-                setPreviewOpen(false);
-                setPreviewResource(null);
-              }}
-              imageUrl={imageUrls[previewResource.imageUrl]}
-              title={previewResource.title}
-            />
-          )}
+        {/* Preview Modal */}
+        <PDFPreviewModal
+          isOpen={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+          pdfUrl={previewResource?.coverImage || ''}
+          title={previewResource?.title || ''}
+          previewPages={3}
+        />
 
         {/* Payment Success Modal */}
-        {currentPurchase && (
-          <PaymentSuccessModal
-            isOpen={paymentSuccess}
-            onClose={() => {
-              setPaymentSuccess(false);
-              setCurrentPurchase(null);
-            }}
-            itemId={currentPurchase.itemId}
-            itemType={currentPurchase.type}
-            itemTitle={currentPurchase.title}
-          />
-        )}
+        <PaymentSuccessModal
+          isOpen={paymentSuccess}
+          onClose={() => setPaymentSuccess(false)}
+          itemId={currentPurchase?.itemId || ''}
+          itemType={currentPurchase?.itemType || 'library'}
+          itemTitle={currentPurchase?.itemTitle || ''}
+        />
       </main>
     </div>
   );

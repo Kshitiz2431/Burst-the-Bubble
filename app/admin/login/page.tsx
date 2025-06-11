@@ -62,6 +62,7 @@ export default function AdminLogin() {
         toast.error(result.error);
       }
     } catch (err) {
+      console.log(err);
       toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);

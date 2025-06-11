@@ -38,8 +38,17 @@ export const ADMIN_ROUTES = {
   SETTINGS: "/admin/settings",
 } as const;
 
+export const AUTH_ROUTES = new Set<string>([
+  ADMIN_ROUTES.LOGIN,
+  ADMIN_ROUTES.SIGNUP,
+]);
+
+// export function isAuthRoute(pathname: string): boolean {
+//   return [ADMIN_ROUTES.LOGIN, ADMIN_ROUTES.SIGNUP].includes(pathname as string);
+// }
+
 export function isAuthRoute(pathname: string): boolean {
-  return [ADMIN_ROUTES.LOGIN, ADMIN_ROUTES.SIGNUP].includes(pathname as any);
+  return AUTH_ROUTES.has(pathname);
 }
 
 export function generateSlug(title: string): string {
