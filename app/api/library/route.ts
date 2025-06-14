@@ -1,7 +1,7 @@
 // app/api/library/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { fromZodError } from "zod-validation-error";
 import { z } from "zod";
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
           description: data.description,
           type: data.type,
           pdfUrl: data.pdfUrl,
-          previewUrl: data.previewUrl,
+          // previewUrl: data.previewUrl,
           coverImage: data.coverImage,
           price: data.price,
           published: data.published,

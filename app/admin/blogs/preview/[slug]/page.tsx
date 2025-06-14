@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { prisma as db } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../../api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { Image } from "@/components/Image";
 import BlogContent from "@/components/resources/BlogContent";
 
