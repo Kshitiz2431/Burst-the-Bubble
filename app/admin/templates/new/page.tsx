@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 
 import { useRouter } from "next/navigation";
+import { uploadFileToS3 } from "@/lib/upload";
+
 
 interface TemplateFormData {
   title: string;
@@ -135,17 +137,24 @@ export default function NewTemplatePage() {
         throw new Error('Please upload a template file');
       }
 
-      const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('price', (formData.price || 0).toString());
-      formDataToSend.append('categoryId', formData.categories[0]?.value || '');
-      formDataToSend.append('templateFile', formData.imageFile);
-      formDataToSend.append('thumbnailFile', formData.imageFile);
+      const uploadResult = await uploadFileToS3(formData.imageFile, "template");
 
-      const response = await fetch('/api/admin/templates', {
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        price: formData.price,
+        categories: formData.categories.map((cat) => cat.value),
+        imageUrl: uploadResult.url,
+        type: formData.type,
+        published: false,
+      };
+
+      const response = await fetch('/api/templates', {
         method: 'POST',
-        body: formDataToSend,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {

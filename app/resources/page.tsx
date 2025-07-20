@@ -616,6 +616,8 @@ import { PDFPreviewModal } from "@/components/library/pdf-preview-modal";
 import { PaymentSuccessModal } from "@/components/payment/success-modal";
 import { toast } from "sonner";
 
+
+
 type Category = {
   name: string;
   slug: string;
@@ -679,6 +681,7 @@ function ImageWithLoader({
   resourceType: string;
 }) {
   const [loading, setLoading] = useState(true);
+  console.log(src);
 
   return (
     <div className="relative h-48 overflow-hidden rounded-t-xl">
@@ -837,6 +840,7 @@ export default function ResourcesPage() {
           ...data.content.templates,
         ];
         setResources(allResources);
+        console.log(allResources);
         setFilteredResources(allResources);
         setCategories(data.categories);
         allResources.forEach((resource) => {
@@ -1070,7 +1074,7 @@ export default function ResourcesPage() {
                           </Link>
                         ) : (
                           <button
-                            onClick={() => { setPreviewResource(resource); setPreviewOpen(true); }}
+                            onClick={() => { console.log(resource);setPreviewResource(resource); setPreviewOpen(true);console.log(previewResource) }}
                             className="inline-flex items-center text-sm font-medium text-[#e27396] hover:text-[#d45c82] transition-colors"
                           >
                             Preview
