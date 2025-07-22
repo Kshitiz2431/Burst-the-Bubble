@@ -103,7 +103,7 @@ export default function TermsAndConditionsPage() {
               <h2 className="text-xl font-semibold text-gray-800 mb-3">8. Disclaimer</h2>
               <p>
                 Our content is for informational and educational purposes only. It is not a substitute for professional counseling, therapy, or legal advice.
-                If you're facing serious emotional or mental health challenges, please seek help from a licensed professional.
+                If you&aposre facing serious emotional or mental health challenges, please seek help from a licensed professional.
               </p>
             </section>
 

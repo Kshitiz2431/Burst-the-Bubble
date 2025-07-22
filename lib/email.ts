@@ -22,8 +22,8 @@ export async function sendEmail(data: EmailPayload) {
     }
 
     return response;
-  } catch (error:any) {
-    console.error('Error sending email:', error.message);
+  } catch (error:unknown) {
+    console.error('Error sending email:');
     throw error;
   }
 } 

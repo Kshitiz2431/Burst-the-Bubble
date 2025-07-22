@@ -149,8 +149,9 @@ export default function ResourcesPage() {
         setPdfUrls((prev)=>({...prev,[key]:data.url}));
       }
     }
-    catch(err:any){
-      console.log(err.message);
+    catch(err:unknown){
+      console.log(err);
+      console.log("unable to fetch pdf url");
     }
   }
 
