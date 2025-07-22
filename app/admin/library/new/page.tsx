@@ -7,6 +7,7 @@ import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/router";
 import { Textarea } from "@/components/ui/textarea";
 import { PDFPreviewModal } from "@/components/library/pdf-preview-modal";
 import { uploadFileToS3 } from "@/lib/upload";
@@ -42,7 +43,7 @@ export default function NewLibraryItemPage() {
     previewPages: 3,
     coverImage: null
   });
-
+  const router=useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPDFPreview, setShowPDFPreview] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -168,6 +169,7 @@ export default function NewLibraryItemPage() {
       }
 
       toast.success("Library item created successfully!");
+      router.push('/admin/library');
 
     } catch (err) {
       console.error("Error creating library item:", err);
