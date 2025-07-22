@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   Instagram,
   Mail,
+  MapPin
 } from "lucide-react";
 
 const Footer = () => {
@@ -86,6 +87,14 @@ const Footer = () => {
                   Privacy Policy
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/terms"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Terms & Conditions
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -97,6 +106,11 @@ const Footer = () => {
                 <Mail className="w-5 h-5" />
                 <span>infoburstthebubble@gmail.com</span>
               </li>
+              <li className="flex items-center gap-2 text-gray-300">
+                <MapPin className="w-7 h-7" />
+                <span>B-196gf, B Block, Sector 31, Noida
+                201301</span>
+              </li>
               <li>
               <div className="mt-8 text-sm text-gray-400 pt-10">
               Subscribe to our newsletter for weekly relationship tips and
@@ -106,10 +120,6 @@ const Footer = () => {
               {/* <li className="flex items-center gap-2 text-gray-300">
                 <Phone className="w-5 h-5" />
                 <span>1-800-BUBBLE</span>
-              </li> */}
-              {/* <li className="flex items-center gap-2 text-gray-300">
-                <MapPin className="w-5 h-5" />
-                <span>123 Love Street</span>
               </li> */}
             </ul>
           </div>

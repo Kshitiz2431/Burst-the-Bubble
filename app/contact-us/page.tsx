@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import {
   Mail,
   Instagram,
+  MapPin
 } from "lucide-react";
 import FaqSection from "@/components/FaqSection";
 
@@ -53,6 +54,13 @@ export default function ContactPage() {
                 </div>
                 <span className="text-lg text-gray-800">1-800-BUBBLE</span>
               </div> */}
+              <div className="flex ml-20">
+                <div className="p-3 bg-[#e27396] rounded-full text-white">
+                  <MapPin className="w-7 h-7" />
+                </div>
+                <span className="mt-3 ml-5">B-196gf, B Block, Sector 31, Noida
+                201301</span>
+              </div>
             </div>
             <div className="mt-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">
