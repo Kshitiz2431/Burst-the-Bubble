@@ -28,6 +28,8 @@ export async function GET(
       },
     });
 
+    console.log(purchase);
+
     if (!purchase || !purchase.template) {
       return NextResponse.json(
         { error: "Purchase not found" },

@@ -138,13 +138,14 @@ export default function NewTemplatePage() {
       }
 
       const uploadResult = await uploadFileToS3(formData.imageFile, "template");
+      console.log(uploadResult.url);
 
       const payload = {
         title: formData.title,
         description: formData.description,
         price: formData.price,
         categories: formData.categories.map((cat) => cat.value),
-        imageUrl: uploadResult.url,
+        imageUrl: uploadResult.key,
         type: formData.type,
         published: false,
       };

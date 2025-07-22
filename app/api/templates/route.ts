@@ -29,7 +29,6 @@ export async function POST(req: NextRequest) {
 
     // Parse and validate request body
     const body = await req.json();
-    console.log(body);
     const validation = createTemplateSchema.safeParse(body);
 
     if (!validation.success) {

@@ -629,6 +629,7 @@ type Resource = {
   description?: string;
   excerpt?: string;
   coverImage?: string;
+  pdfUrl?:string;
   slug?: string;
   imageUrl?: string; // For templates
   price?: number;
@@ -725,6 +726,7 @@ export default function ResourcesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const [pdfUrls, setPdfUrls] = useState<Record<string, string>>({});
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewResource, setPreviewResource] = useState<Resource | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -742,6 +744,19 @@ export default function ResourcesPage() {
       console.error("Error fetching image URL:", error);
     }
   };
+
+  const fetchPdfUrl=async(key:string)=>{
+    try{
+      const response=await fetch(`/api/image/${encodeURIComponent(key)}`);
+      const data=await response.json();
+      if(data.url){
+        setPdfUrls((prev)=>({...prev,[key]:data.url}));
+      }
+    }
+    catch(err:any){
+      console.log(err.message);
+    }
+  }
 
   const handlePayment = async (resource: Resource) => {
     try {
@@ -847,6 +862,10 @@ export default function ResourcesPage() {
           const key = resource.type === "template" ? resource.imageUrl : resource.coverImage;
           if (key) {
             fetchImageUrl(key);
+          }
+          const pdfUrlKey=resource.type === "library" ? resource.pdfUrl : "";
+          if(pdfUrlKey){
+            fetchPdfUrl(pdfUrlKey);
           }
         });
       } catch (error) {
@@ -1105,7 +1124,7 @@ export default function ResourcesPage() {
         <PDFPreviewModal
           isOpen={previewOpen}
           onClose={() => setPreviewOpen(false)}
-          pdfUrl={previewResource?.coverImage || ''}
+          pdfUrl={pdfUrls[previewResource?.pdfUrl || ""]}
           title={previewResource?.title || ''}
           previewPages={3}
         />

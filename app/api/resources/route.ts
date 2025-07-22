@@ -51,6 +51,7 @@ export async function GET() {
         title: true,
         description: true,
         coverImage: true,
+        pdfUrl:true,
         price: true,
         previewPages: true,
         categories: {
