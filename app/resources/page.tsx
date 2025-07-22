@@ -32,7 +32,7 @@ type Resource = {
 
 type Purchase = {
   itemId: string;
-  itemType: 'library' | 'template';
+  type: 'library' | 'template';
   itemTitle: string;
 };
 
@@ -110,6 +110,8 @@ function ImageWithLoader({
   );
 }
 
+
+
 export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -125,6 +127,7 @@ export default function ResourcesPage() {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [currentPurchase, setCurrentPurchase] = useState<Purchase | null>(null);
+  const [imagePreviewOpen,setImagePreviewOpen]=useState(false);
 
   const fetchImageUrl = async (key: string) => {
     try {
@@ -188,6 +191,7 @@ export default function ResourcesPage() {
             }
             setCurrentPurchase(verifyData.purchase);
             setPaymentSuccess(true);
+            setIsProcessingPayment(false);
           } catch (error) {
             toast.error(error instanceof Error ? error.message : "Payment verification failed");
           }
@@ -483,7 +487,7 @@ export default function ResourcesPage() {
                             Read More
                             <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                           </Link>
-                        ) : (
+                        ) : resource.type==="library" ? (
                           
                           <button
                             onClick={() => {setPreviewResource(resource); setPreviewOpen(true); }}
@@ -492,7 +496,13 @@ export default function ResourcesPage() {
                             Preview
                             <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                           </button>
-                        )}
+                        ):( <button
+                          onClick={() => {setPreviewResource(resource); setImagePreviewOpen(true); }}
+                          className="inline-flex items-center text-sm font-medium text-[#e27396] hover:text-[#d45c82] transition-colors"
+                        >
+                          Preview
+                          <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>) }
                         {resource.type !== "blog" && (
                           <button
                             onClick={() => handlePayment(resource)}
@@ -521,17 +531,17 @@ export default function ResourcesPage() {
           title={previewResource?.title || ''}
           previewPages={3}
         />
-        {/* <ImagePreviewModal
+        <ImagePreviewModal
           isOpen={imagePreviewOpen}
-          onClose={()=> setImagePreviewModal(false)}
-          imageUrl={}
-          title={}
-        /> */}
+          onClose={()=> setImagePreviewOpen(false)}
+          imageUrl={imageUrls[previewResource?.imageUrl || ""]}
+          title={previewResource?.title || ""}
+        />
         <PaymentSuccessModal
           isOpen={paymentSuccess}
           onClose={() => setPaymentSuccess(false)}
           itemId={currentPurchase?.itemId || ''}
-          itemType={currentPurchase?.itemType || 'library'}
+          itemType={currentPurchase?.type || 'library'}
           itemTitle={currentPurchase?.itemTitle || ''}
         />
       </main>
