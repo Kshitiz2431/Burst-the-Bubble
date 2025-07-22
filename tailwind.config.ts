@@ -6,6 +6,13 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  safelist: [
+    'bg-gradient-to-br',
+    'from-white',
+    'to-pink-50',
+    'to-purple-50',
+    'to-rose-50',
+  ],
   theme: {
     extend: {
       animation: {

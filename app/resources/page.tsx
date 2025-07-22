@@ -346,7 +346,7 @@ export default function ResourcesPage() {
 
         <div className="relative max-w-2xl mx-auto mb-12">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 1, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="relative z-10"
@@ -367,7 +367,7 @@ export default function ResourcesPage() {
 
         <div className="mb-8">
           <motion.div 
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 1, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="flex flex-wrap justify-center gap-4 mb-6"
@@ -375,7 +375,7 @@ export default function ResourcesPage() {
             {resourceTypes.map((type, index) => (
               <motion.button
                 key={type.id}
-                initial={{ opacity: 0, x: -10 }}
+                initial={{ opacity: 1, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 + index * 0.1 }}
                 onClick={() => setSelectedType(type.id)}
@@ -397,7 +397,7 @@ export default function ResourcesPage() {
             ))}
           </motion.div>
           <motion.div 
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 1, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             className="flex flex-wrap justify-center gap-2"
@@ -414,7 +414,7 @@ export default function ResourcesPage() {
             </button>
             {categories.map((category, index) => (
               <motion.button
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 1, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 + index * 0.03 }}
                 key={category.slug}
@@ -433,7 +433,7 @@ export default function ResourcesPage() {
 
         {isLoading ? (
           <motion.div 
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
             className="flex items-center justify-center py-12"
           >
@@ -454,7 +454,7 @@ export default function ResourcesPage() {
                   <motion.div
                     key={resource.id}
                     layout
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 1, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05, duration: 0.3 }}
