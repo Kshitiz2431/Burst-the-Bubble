@@ -2,9 +2,10 @@
 
 import ReactDOM from 'react-dom/client';
 import { ImageEditor } from "./new-image-editor";
-import { toast } from "sonner";
+import { toast  } from "sonner";
 import { v4 as uuidv4 } from 'uuid';
 import Quill from 'quill';
+// import { da } from 'date-fns/locale';
 
 
 export const modules = {
@@ -40,8 +41,6 @@ export const modules = {
           const range = quill.getSelection(true);
 
           try {
-            // Show loading toast
-            toast.loading('Preparing image editor...');
             
             // Create and show modal with ImageEditor
             const editorContainer = document.createElement('div');
@@ -55,8 +54,6 @@ export const modules = {
             
             const root = ReactDOM.createRoot(editorContainer);
             
-            // Dismiss loading toast
-            toast.dismiss();
             
             root.render(
               <ImageEditor
@@ -70,7 +67,7 @@ export const modules = {
                     }
                     
                     // Show upload toast
-                    toast.loading('Uploading image...');
+                    const toastId=toast.loading('Uploading image...');
                     
                     // Upload the image using our helper
                     const { apiUrl, key } = await uploadImage(croppedImage);
@@ -92,8 +89,7 @@ export const modules = {
                         break;
                       }
                     }
-                    
-                    toast.success('Image uploaded successfully!');
+                    toast.success('Image uploaded successfully!',{id:toastId});
                   } catch (error) {
                     console.error('Error:', error);
                     toast.error(error instanceof Error ? error.message : "Failed to upload image");
@@ -147,20 +143,23 @@ export const getImageUrl = async (key: string): Promise<string> => {
   
   try {
     // Key should already be encoded by the caller
-    const response = await fetch(`/api/image/${key}`);
+
+    const url=`https://burstbubble-blogs.s3.ap-south-1.amazonaws.com/${key}`;
+    return url;
     
-    if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`Failed to get image URL (${response.status}): ${errorData}`);
-    }
+    // if (!response.ok) {
+    //   const errorData = await response.text();
+    //   throw new Error(`Failed to get image URL (${response.status}): ${errorData}`);
+    // }
     
-    const data = await response.json();
+    // const data = await response.json();
+    // console.log(data.url);
     
-    if (!data.url) {
-      throw new Error('Invalid response from image API: missing URL');
-    }
+    // if (!data.url) {
+    //   throw new Error('Invalid response from image API: missing URL');
+    // }
     
-    return data.url;
+    // return data.url;
   } catch (error) {
     console.error('Error getting image URL:', error);
     throw error;
@@ -267,14 +266,13 @@ export const uploadImage = async (file: File): Promise<{ apiUrl: string, key: st
     const fileName = `${uuidv4()}-${file.name.replace(/\s+/g, '-').toLowerCase()}`;
     
     // Get presigned URL for upload
-    const response = await fetch("/api/upload", {
+    const response = await fetch("/api/upload/blog", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         filename: fileName,
-        contentType: file.type,
-        type: "content",
-      }),
+        contentType: file.type
+      })
     });
     
     if (!response.ok) {
