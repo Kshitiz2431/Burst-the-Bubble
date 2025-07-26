@@ -84,7 +84,7 @@ export default function ContactPage() {
                 ].map((social) => (
                   <a
                     key={social.label}
-                    href="#"
+                    href="https://www.instagram.com/burstthebubble__/"
                     className="p-3 bg-gray-100 rounded-full hover:bg-[#e27396] hover:text-white transition-colors"
                     aria-label={social.label}
                   >

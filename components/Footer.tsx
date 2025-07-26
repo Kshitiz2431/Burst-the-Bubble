@@ -130,7 +130,7 @@ const Footer = () => {
 
               <h3 className="text-lg font-semibold mb-4">Follow Us on Instagram</h3>
                 <a
-                  href="https://www.instagram.com/burst_thebubble/?hl=en"
+                  href="https://www.instagram.com/burstthebubble__/"
                   className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-[#e27396] transition-colors"
                   aria-label="Instagram"
                 >
