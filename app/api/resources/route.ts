@@ -2,6 +2,9 @@
 import {  NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET() {
   try {
     // 1. First get categories
@@ -65,7 +68,7 @@ export async function GET() {
         createdAt: 'desc'
       }
     });
-
+	console.log(libraryItems);
     // 4. Get templates
     const templates = await prisma.template.findMany({
       where: {

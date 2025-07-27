@@ -187,7 +187,7 @@ export default function CategoriesPage() {
                 
                 <DeleteButton 
                   categoryId={category.id}
-                  disabled={(category._count?.blogs || 0) > 0}
+		  disabled={(category._count?.blogs || category._count?.library || category._count?.templates || 0) > 0}
                   itemCounts={category._count || { blogs: 0 }}
                 />
               </div>
@@ -245,6 +245,27 @@ export default function CategoriesPage() {
                     </div>
                   </div>
                 )}
+		
+		 {category.library && category.library.length > 0 && (
+                  <div className="border-t pt-4">
+                    <h3 className="text-sm font-medium text-gray-900 mb-2">
+                      Associated Library Items
+                    </h3>
+                    <div className="space-y-2">
+                      {category.library.map((library) => (
+                        <div
+                          key={library.id}
+                          className="flex items-center justify-between text-sm"
+                        >
+                          <span className="text-gray-600">
+                            {library.title}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+		
               </div>
             </Card>
           ))

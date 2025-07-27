@@ -55,10 +55,9 @@ export async function DELETE(
     }
 
     // Soft delete the category
-    await prisma.category.update({
+    await prisma.category.delete({
       where: { id },
-      data: { isActive: false },
-    });
+   });
 
     return NextResponse.json(
       { success: true, message: "Category deleted successfully" },

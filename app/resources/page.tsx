@@ -245,7 +245,7 @@ export default function ResourcesPage() {
     const fetchResources = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch("/api/resources");
+        const response = await fetch("/api/resources",{cache:"no-store"});
         const data = await response.json();
         const allResources = [
           ...data.content.blogs,

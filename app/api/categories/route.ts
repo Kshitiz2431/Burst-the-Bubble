@@ -75,6 +75,7 @@ export async function GET(req: NextRequest) {
                 select: {
                   blogs: true,
                   templates: true,
+		  library:true,
                 }
               },
               blogs: {
@@ -92,6 +93,12 @@ export async function GET(req: NextRequest) {
                   // Don't include slug as it might not exist in the template schema
                 },
               },
+	     library:{
+		select: {
+                  id: true,
+                  title: true,
+		},
+	     }
             },
             orderBy: {
               name: 'asc',
@@ -106,9 +113,8 @@ export async function GET(req: NextRequest) {
               _count: {
                 blogs: category._count.blogs,
                 templates: category._count.templates,
-                library: 0
+                library: category._count.library,
               },
-              library: []
             };
           });
           

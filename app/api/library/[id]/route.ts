@@ -43,12 +43,12 @@ export async function DELETE(
     }
 
     // Check if item has any purchases
-    if (item.purchases.length > 0) {
-      return NextResponse.json(
-        { error: "Cannot delete item with existing purchases" },
-        { status: 400 }
-      );
-    }
+//    if (item.purchases.length > 0) {
+//      return NextResponse.json(
+//        { error: "Cannot delete item with existing purchases" },
+//        { status: 400 }
+//    );
+//    }
 
     // Delete files from S3
     try {
