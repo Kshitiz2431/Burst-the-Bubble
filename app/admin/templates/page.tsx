@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { 
-  PlusCircle, 
-  Pencil, 
+  PlusCircle,  
   Download,
   FileText,
   ArrowDownToLine 
@@ -115,11 +114,7 @@ export default async function TemplatesPage() {
                         <Eye className="w-4 h-4" />
                       </Link>
                     </Button> */}
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={`/admin/templates/edit/${template.id}`}>
-                        <Pencil className="w-4 h-4" />
-                      </Link>
-                    </Button>
+             
                     {/* <Button asChild size="sm" variant="outline" className="text-red-500 hover:text-red-600">
                       <Link href={`/admin/templates/${template.id}`}>
                         <Trash2 className="w-4 h-4" />
